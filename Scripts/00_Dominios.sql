@@ -1,0 +1,8 @@
+CREATE DOMAIN TEmail AS VARCHAR(254)
+CONSTRAINT chk_email
+    CHECK (VALUE LIKE '%@%');
+
+
+CREATE DOMAIN TTelefono AS VARCHAR(10)
+CONSTRAINT chk_telefono
+    CHECK (VALUE ~ '^[0-9]+$');
