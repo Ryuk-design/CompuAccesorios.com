@@ -8,7 +8,8 @@ CREATE TABLE Personas(
 
 CREATE TABLE Empleados(
     cedula_empleado VARCHAR(10) NOT NULL,
-    salario_empleado INT NOT NULL
+    salario_empleado INT NOT NULL,
+    actualmente_trabaja BOOLEAN
 );
 
 
