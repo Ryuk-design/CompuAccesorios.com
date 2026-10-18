@@ -1,4 +1,4 @@
-CREATE TABLE Personas(
+CREATE TABLE personas(
     cedula VARCHAR(10) NOT NULL,
     email TEmail NOT NULL,
     telefono TTelefono NOT NULL,
@@ -6,37 +6,37 @@ CREATE TABLE Personas(
 );
 
 
-CREATE TABLE Empleados(
+CREATE TABLE empleados(
     cedula_empleado VARCHAR(10) NOT NULL,
     salario_empleado INT NOT NULL,
     actualmente_trabaja BOOLEAN
 );
 
 
-CREATE TABLE Tecnicos(
+CREATE TABLE tecnicos(
     cedula_tecnico VARCHAR(10) NOT NULL,
     comision_servicio INT NOT NULL,
     id_especializacion INT NOT NULL
 );
 
 
-CREATE TABLE Vendedores(
+CREATE TABLE vendedores(
     cedula_vendedor VARCHAR(10) NOT NULL,
     comision_venta INT NOT NULL
 );
 
 
-CREATE TABLE Especializaciones(
+CREATE TABLE especializaciones(
     id INT NOT NULL,
     especializacion TEspecializacion NOT NULL
 );
 
 
-CREATE TABLE ServiciosTecnicos(
+CREATE TABLE serviciosTecnicos(
     id INT NOT NULL,
     id_tecnico VARCHAR(10) NOT NULL,
     fecha_inicio_servicio TIMESTAMP NOT NULL,
-    fecha_estimada_entrega TIME NOT NULL,
+    fecha_estimada_entrega TIMESTAMP NOT NULL,
     fecha_entrega TIMESTAMP,
     id_estado_servicio INT NOT NULL,
     id_catalogo_servicio INT NOT NULL,
@@ -44,31 +44,31 @@ CREATE TABLE ServiciosTecnicos(
 );
 
 
-CREATE TABLE CatalogodeServicios(
+CREATE TABLE catalogodeServicios(
     id INT NOT NULL,
     descripcion_servicio VARCHAR(200) NOT NULL,
     precio_base INT NOT NULL
 );
 
 
-CREATE TABLE EstadosdeServicios(
+CREATE TABLE estadosDeServicios(
     id INT NOT NULL,
     nombre_estado TEstado NOT NULL
 );
 
 
-CREATE TABLE EstadosdePago(
+CREATE TABLE estadosDePago(
     id INT NOT NULL,
     nombre_estado_pago TEstadoPago NOT NULL
 );
 
 
-CREATE TABLE Clientes(
+CREATE TABLE clientes(
     cedula_cliente VARCHAR(10) NOT NULL
 );
 
 
-CREATE TABLE Ventas(
+CREATE TABLE ventas(
     id INT NOT NULL,
     fecha_venta TIMESTAMP NOT NULL,
     total_venta INT NOT NULL,
@@ -77,7 +77,7 @@ CREATE TABLE Ventas(
 );
 
 
-CREATE TABLE DetallesdeVenta(
+CREATE TABLE detallesdeVenta(
     id_venta INT NOT NULL,
     id_producto INT NOT NULL,
     cantidad INT NOT NULL,
@@ -85,7 +85,7 @@ CREATE TABLE DetallesdeVenta(
 );
 
 
-CREATE TABLE Productos(
+CREATE TABLE productos(
     id INT NOT NULL,
     nombre_producto VARCHAR(100) NOT NULL,
     precio_unitario_producto INT NOT NULL,
@@ -96,7 +96,7 @@ CREATE TABLE Productos(
 );
 
 
-CREATE TABLE Proveedores(
+CREATE TABLE proveedores(
     id INT NOT NULL,
     telefono_proveedor TTelefono NOT NULL,
     email_proveedor TEmail NOT NULL,
@@ -105,13 +105,13 @@ CREATE TABLE Proveedores(
 );
 
 
-CREATE TABLE Inventarios(
+CREATE TABLE inventarios(
     id INT NOT NULL,
     descripcion_inventario VARCHAR(200) NOT NULL
 );
 
 
-CREATE TABLE Categorias(
+CREATE TABLE categorias(
     id INT NOT NULL,
     nombre_categoria VARCHAR(100) NOT NULL,
     descripcion_categoria VARCHAR(200) NOT NULL

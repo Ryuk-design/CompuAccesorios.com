@@ -1,73 +1,73 @@
-ALTER TABLE Personas
+ALTER TABLE personas
 ADD CONSTRAINT pk_Personas
     PRIMARY KEY (cedula);
 
 
-ALTER TABLE Empleados
+ALTER TABLE empleados
 ADD CONSTRAINT pk_Empleados
     PRIMARY KEY (cedula_empleado);
 
 
-ALTER TABLE Tecnicos
+ALTER TABLE tecnicos
 ADD CONSTRAINT pk_Tecnicos
     PRIMARY KEY (cedula_tecnico);
 
 
-ALTER TABLE Vendedores
+ALTER TABLE vendedores
 ADD CONSTRAINT pk_Vendedores
     PRIMARY KEY (cedula_vendedor);
 
 
-ALTER TABLE ServiciosTecnicos
-ADD CONSTRAINT pk_ServiciosTecnicos
+ALTER TABLE serviciosTecnicos
+ADD CONSTRAINT pk_serviciosTecnicos
     PRIMARY KEY (id);
 
 
-ALTER TABLE CatalogodeServicios
-ADD CONSTRAINT pk_CatalogodeServicios
+ALTER TABLE catalogoDeServicios
+ADD CONSTRAINT pk_catalogodeServicios
     PRIMARY KEY (id);
 
 
-ALTER TABLE EstadosdeServicios
-ADD CONSTRAINT pk_EstadosdeServicios
+ALTER TABLE estadosDeServicios
+ADD CONSTRAINT pk_estadosDeServicios
     PRIMARY KEY (id);
 
 
-ALTER TABLE EstadosdePago
-ADD CONSTRAINT pk_EstadosdePago
+ALTER TABLE estadosDePago
+ADD CONSTRAINT pk_estadosDePago
     PRIMARY KEY (id);
 
 
-ALTER TABLE Clientes
-ADD CONSTRAINT pk_Clientes
+ALTER TABLE clientes
+ADD CONSTRAINT pk_clientes
     PRIMARY KEY (cedula_cliente);
 
 
-ALTER TABLE Ventas
-ADD CONSTRAINT pk_Ventas
+ALTER TABLE ventas
+ADD CONSTRAINT pk_ventas
     PRIMARY KEY (id);
 
 
-ALTER TABLE DetallesdeVenta
-ADD CONSTRAINT pk_DetallesdeVenta
+ALTER TABLE detallesDeVenta
+ADD CONSTRAINT pk_detallesDeVenta
     PRIMARY KEY (id_venta, id_producto);
 
 
-ALTER TABLE Productos
-ADD CONSTRAINT pk_Productos
+ALTER TABLE productos
+ADD CONSTRAINT pk_productos
     PRIMARY KEY (id);
 
 
-ALTER TABLE Proveedores
-ADD CONSTRAINT pk_Proveedores
+ALTER TABLE proveedores
+ADD CONSTRAINT pk_proveedores
     PRIMARY KEY (id);
 
 
-ALTER TABLE Inventarios
-ADD CONSTRAINT pk_Inventarios
+ALTER TABLE inventarios
+ADD CONSTRAINT pk_inventarios
     PRIMARY KEY (id);
 
 
-ALTER TABLE Categorias
-ADD CONSTRAINT pk_Categorias
+ALTER TABLE categorias
+ADD CONSTRAINT pk_categorias
     PRIMARY KEY (id);

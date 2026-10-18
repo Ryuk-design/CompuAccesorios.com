@@ -3,11 +3,6 @@ CONSTRAINT chk_emails
     CHECK (VALUE LIKE '%@%');
 
 
-CREATE DOMAIN TTelefono AS VARCHAR(10)
-CONSTRAINT chk_telefonos
-    CHECK (VALUE ~ '^[0-9]+$');
-
-
 CREATE DOMAIN TEspecializacion AS VARCHAR(40)
 CONSTRAINT chk_especializaciones
     CHECK (VALUE IN('Mantenimiento de Hardware',
