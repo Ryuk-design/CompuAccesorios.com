@@ -2,7 +2,7 @@ CREATE TABLE Personas(
     cedula VARCHAR(10) NOT NULL,
     email TEmail NOT NULL,
     telefono TTelefono NOT NULL,
-    nombre VARCHAR(100) NOT NULL
+    nombre TNombre NOT NULL
 );
 
 
@@ -27,7 +27,7 @@ CREATE TABLE Vendedores(
 
 CREATE TABLE Especializaciones(
     id INT NOT NULL,
-    especializacion VARCHAR(40) NOT NULL
+    especializacion TEspecializacion NOT NULL
 );
 
 
@@ -52,13 +52,13 @@ CREATE TABLE CatalogodeServicios(
 
 CREATE TABLE EstadosdeServicios(
     id INT NOT NULL,
-    nombre_estado VARCHAR(10) NOT NULL
+    nombre_estado TEstado NOT NULL
 );
 
 
 CREATE TABLE EstadosdePago(
     id INT NOT NULL,
-    nombre_estado_pago VARCHAR(10) NOT NULL
+    nombre_estado_pago TEstadoPago NOT NULL
 );
 
 
