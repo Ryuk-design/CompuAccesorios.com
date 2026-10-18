@@ -30,6 +30,21 @@ VALUES (2, '1000000001', '2026-10-18 09:00', '2026-10-17 09:00', 1, 1, 1);
 
 -- RESTRICCIÓN 2: fecha_entrega >= fecha_inicio_servicio
 
--- fecha de entrega igual anterior a la fecha de inicio
+-- fecha de entrega anterior a la fecha de inicio
 INSERT INTO serviciosTecnicos (id, id_tecnico, fecha_inicio_servicio, fecha_estimada_entrega, fecha_entrega, id_estado_servicio, id_catalogo_servicio, id_estado_pago)
 VALUES (4, '1000000001', '2026-10-18 09:00', '2026-10-19 09:00', '2026-10-17 09:00', 1, 1, 1);
+
+
+TRUNCATE TABLE
+    personas,
+    empleados,
+    especializaciones,
+    tecnicos,
+    estadosDeServicios,
+    estadosDePago,
+    catalogoDeServicios,
+    serviciosTecnicos,
+    productos,
+    ventas,
+    detallesdeventa
+CASCADE;

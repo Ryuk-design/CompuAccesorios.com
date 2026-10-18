@@ -33,3 +33,18 @@ VALUES (1, '1000000001', '2026-10-18 09:00', '2026-10-18 09:00', 1, 1, 1);
 -- fecha de entrega igual a la fecha de inicio
 INSERT INTO serviciosTecnicos (id, id_tecnico, fecha_inicio_servicio, fecha_estimada_entrega, fecha_entrega, id_estado_servicio, id_catalogo_servicio, id_estado_pago)
 VALUES (3, '1000000001', '2026-10-18 09:00', '2026-10-19 09:00', '2026-10-18 09:00', 1, 1, 1);
+
+
+TRUNCATE TABLE
+    personas,
+    empleados,
+    especializaciones,
+    tecnicos,
+    estadosDeServicios,
+    estadosDePago,
+    catalogoDeServicios,
+    serviciosTecnicos,
+    productos,
+    ventas,
+    detallesdeventa
+CASCADE;
