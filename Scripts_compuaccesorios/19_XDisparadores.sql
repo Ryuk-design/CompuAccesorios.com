@@ -15,3 +15,4 @@ DROP FUNCTION IF EXISTS fn_servicio_entregado_no_eliminable();
 DROP FUNCTION IF EXISTS fn_detalle_validar_existencias();
 DROP FUNCTION IF EXISTS fn_detalle_ajustar_existencias();
 DROP FUNCTION IF EXISTS fn_detalle_recalcular_total();
+
