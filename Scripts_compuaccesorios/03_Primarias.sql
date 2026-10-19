@@ -18,6 +18,11 @@ ADD CONSTRAINT pk_Vendedores
     PRIMARY KEY (cedula_vendedor);
 
 
+ALTER TABLE especializaciones
+ADD CONSTRAINT pk_especializaciones
+    PRIMARY KEY (id);
+
+
 ALTER TABLE serviciosTecnicos
 ADD CONSTRAINT pk_serviciosTecnicos
     PRIMARY KEY (id);
