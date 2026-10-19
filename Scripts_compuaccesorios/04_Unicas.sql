@@ -30,7 +30,6 @@ ADD CONSTRAINT uk_Provedores_email_proveedor
 
 -- FinalProveedores
 
-
 -- MANTENER ESTADO SERVICIO
 -- El nombre del estado de servicio no se puede repetir.
 ALTER TABLE estadosDeServicios
