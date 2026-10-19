@@ -1,8 +1,14 @@
+-- La cedula solo puede contener numeros (maximo 10 digitos por el tipo de dato).
+ALTER TABLE personas
+ADD CONSTRAINT chk_personas_cedula
+    CHECK (cedula ~ '^[0-9]+$');
+
+
 -- MANTENER EMPLEADO
 -- Si no se indica, un empleado nuevo queda como activo por defecto.
 ALTER TABLE empleados
 ALTER COLUMN actualmente_trabaja
-    SET DEFAULT FALSE;
+    SET DEFAULT TRUE;
 
 ALTER TABLE empleados
 ADD CONSTRAINT chk_empleados_salario
@@ -71,18 +77,6 @@ ADD CONSTRAINT chk_detallesDeVenta_precio_unitario
 ALTER TABLE ventas
 ADD CONSTRAINT chk_ventas_total
     CHECK (total_venta >= 0);
-
-
--- Si no se indica, el estado del servicio al crearlo se asigna el estado 'En proceso' por defecto.
-ALTER TABLE estadosDeServicios
-ALTER COLUMN nombre_estado
-    SET DEFAULT 'En Proceso';
-
-
--- Si no se indica, el estado de pago al crearlo es 'Pendiente' por defecto.
-ALTER TABLE estadosDePago
-ALTER COLUMN nombre_estado_pago
-    SET DEFAULT 'Pendiente';
 
 
 -- Si no se indica, la fecha de inicio del servicio es la fecha y hora actual por defecto.
