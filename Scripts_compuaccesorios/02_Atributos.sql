@@ -3,7 +3,6 @@ ALTER TABLE personas
 ADD CONSTRAINT chk_personas_cedula
     CHECK (cedula ~ '^[0-9]+$');
 
-
 -- MANTENER EMPLEADO
 -- Si no se indica, un empleado nuevo queda como activo por defecto.
 ALTER TABLE empleados
@@ -77,7 +76,6 @@ ADD CONSTRAINT chk_detallesDeVenta_precio_unitario
 ALTER TABLE ventas
 ADD CONSTRAINT chk_ventas_total
     CHECK (total_venta >= 0);
-
 
 -- Si no se indica, la fecha de inicio del servicio es la fecha y hora actual por defecto.
 ALTER TABLE serviciosTecnicos
