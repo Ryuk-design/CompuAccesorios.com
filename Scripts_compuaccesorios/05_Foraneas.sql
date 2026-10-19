@@ -16,6 +16,13 @@ ADD CONSTRAINT fk_Vendedores_Empleados
         REFERENCES Empleados (cedula_empleado);
 
 
+-- Todo tecnico debe tener una especializacion existente.
+ALTER TABLE Tecnicos
+ADD CONSTRAINT fk_Tecnicos_Especializaciones
+    FOREIGN KEY (id_especializacion)
+        REFERENCES Especializaciones (id);
+
+
 -- InicioServiciosTecnicos
 
 
