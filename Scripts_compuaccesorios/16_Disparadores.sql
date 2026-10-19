@@ -16,7 +16,6 @@ BEFORE UPDATE ON Personas
 FOR EACH ROW
 EXECUTE FUNCTION fn_cedula_no_modificable();
 
-
 -- ============================================================
 -- Empleados: no puede ser tecnico y vendedor al mismo tiempo
 -- ============================================================
