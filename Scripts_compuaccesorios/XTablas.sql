@@ -7,10 +7,10 @@ DROP TABLE IF EXISTS ServiciosTecnicos;
 DROP TABLE IF EXISTS Ventas;
 
 
-DROP TABLE IF EXISTS Especializaciones;
-
-
 DROP TABLE IF EXISTS Tecnicos;
+
+
+DROP TABLE IF EXISTS Especializaciones;
 
 
 DROP TABLE IF EXISTS Vendedores;
