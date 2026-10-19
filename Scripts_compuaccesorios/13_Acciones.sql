@@ -20,7 +20,6 @@ ADD CONSTRAINT fk_Vendedores_Empleados
         REFERENCES empleados (cedula_empleado)
         ON DELETE CASCADE;
 
-
 -- REGISTRAR VENTA
 -- Al anular una venta se elimina tambien su detalle.
 ALTER TABLE detallesDeVenta
