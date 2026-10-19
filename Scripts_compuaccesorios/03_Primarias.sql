@@ -67,11 +67,9 @@ ALTER TABLE proveedores
 ADD CONSTRAINT pk_proveedores
     PRIMARY KEY (id);
 
-
 ALTER TABLE inventarios
 ADD CONSTRAINT pk_inventarios
     PRIMARY KEY (id);
-
 
 ALTER TABLE categorias
 ADD CONSTRAINT pk_categorias
