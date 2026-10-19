@@ -58,7 +58,6 @@ ADD CONSTRAINT fk_Clientes_Personas
     FOREIGN KEY (cedula_cliente)
         REFERENCES Personas (cedula);
 
-
 --InicioVentas
 
 
