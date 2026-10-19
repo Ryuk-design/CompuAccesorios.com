@@ -29,3 +29,17 @@ ADD CONSTRAINT uk_Provedores_email_proveedor
     UNIQUE (email_proveedor);
 
 -- FinalProveedores
+
+
+-- MANTENER ESTADO SERVICIO
+-- El nombre del estado de servicio no se puede repetir.
+ALTER TABLE estadosDeServicios
+ADD CONSTRAINT uk_estadosDeServicios_nombre_estado
+    UNIQUE (nombre_estado);
+
+
+-- MANTENER ESTADO PAGO
+-- El nombre del estado de pago no se puede repetir.
+ALTER TABLE estadosDePago
+ADD CONSTRAINT uk_estadosDePago_nombre_estado_pago
+    UNIQUE (nombre_estado_pago);
