@@ -23,7 +23,6 @@ ALTER TABLE Proveedores
 ADD CONSTRAINT uk_Provedores_telefono_proveedor
     UNIQUE (telefono_proveedor);
 
-
 ALTER TABLE Proveedores
 ADD CONSTRAINT uk_Provedores_email_proveedor
     UNIQUE (email_proveedor);
