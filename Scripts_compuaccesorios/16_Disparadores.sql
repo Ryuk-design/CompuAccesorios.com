@@ -1,6 +1,4 @@
--- ============================================================
 -- Personas: la cedula no se puede modificar
--- ============================================================
 CREATE OR REPLACE FUNCTION fn_cedula_no_modificable()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -16,9 +14,8 @@ BEFORE UPDATE ON Personas
 FOR EACH ROW
 EXECUTE FUNCTION fn_cedula_no_modificable();
 
--- ============================================================
+
 -- Empleados: no puede ser tecnico y vendedor al mismo tiempo
--- ============================================================
 CREATE OR REPLACE FUNCTION fn_tecnico_no_es_vendedor()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -51,9 +48,7 @@ FOR EACH ROW
 EXECUTE FUNCTION fn_vendedor_no_es_tecnico();
 
 
--- ============================================================
 -- Servicios tecnicos: Entregado exige fecha de entrega
--- ============================================================
 CREATE OR REPLACE FUNCTION fn_servicio_entregado_con_fecha()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -73,9 +68,7 @@ FOR EACH ROW
 EXECUTE FUNCTION fn_servicio_entregado_con_fecha();
 
 
--- ============================================================
 -- Servicios tecnicos: no se elimina uno en estado Entregado
--- ============================================================
 CREATE OR REPLACE FUNCTION fn_servicio_entregado_no_eliminable()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -95,9 +88,7 @@ FOR EACH ROW
 EXECUTE FUNCTION fn_servicio_entregado_no_eliminable();
 
 
--- ============================================================
 -- Detalles de venta: no se vende mas de lo disponible
--- ============================================================
 CREATE OR REPLACE FUNCTION fn_detalle_validar_existencias()
 RETURNS TRIGGER AS $$
 DECLARE
@@ -106,6 +97,11 @@ BEGIN
     SELECT cantidad_producto INTO v_disponible
     FROM Productos
     WHERE id = NEW.id_producto;
+
+    -- Si el producto no existe, se avisa con un mensaje claro
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'El producto % no existe', NEW.id_producto;
+    END IF;
 
     -- Si se modifica la cantidad del mismo producto, lo ya descontado vuelve a estar disponible
     IF TG_OP = 'UPDATE' AND OLD.id_producto = NEW.id_producto THEN
@@ -126,9 +122,7 @@ FOR EACH ROW
 EXECUTE FUNCTION fn_detalle_validar_existencias();
 
 
--- ============================================================
 -- Detalles de venta: descuenta / devuelve existencias
--- ============================================================
 CREATE OR REPLACE FUNCTION fn_detalle_ajustar_existencias()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -161,27 +155,30 @@ FOR EACH ROW
 EXECUTE FUNCTION fn_detalle_ajustar_existencias();
 
 
--- ============================================================
 -- Detalles de venta: recalcula el total de la venta
--- ============================================================
+-- Si el detalle cambia de venta, se recalculan la venta anterior y la nueva
 CREATE OR REPLACE FUNCTION fn_detalle_recalcular_total()
 RETURNS TRIGGER AS $$
-DECLARE
-    v_venta INT;
 BEGIN
-    IF TG_OP = 'DELETE' THEN
-        v_venta := OLD.id_venta;
-    ELSE
-        v_venta := NEW.id_venta;
+    IF TG_OP IN ('UPDATE', 'DELETE') THEN
+        UPDATE Ventas
+        SET total_venta = COALESCE((
+                SELECT SUM(cantidad * precio_unitario)
+                FROM DetallesdeVenta
+                WHERE id_venta = OLD.id_venta
+            ), 0)
+        WHERE id = OLD.id_venta;
     END IF;
 
-    UPDATE Ventas
-    SET total_venta = COALESCE((
-            SELECT SUM(cantidad * precio_unitario)
-            FROM DetallesdeVenta
-            WHERE id_venta = v_venta
-        ), 0)
-    WHERE id = v_venta;
+    IF TG_OP IN ('INSERT', 'UPDATE') THEN
+        UPDATE Ventas
+        SET total_venta = COALESCE((
+                SELECT SUM(cantidad * precio_unitario)
+                FROM DetallesdeVenta
+                WHERE id_venta = NEW.id_venta
+            ), 0)
+        WHERE id = NEW.id_venta;
+    END IF;
     RETURN NULL;
 END;
 $$ LANGUAGE plpgsql;
