@@ -163,7 +163,7 @@ BEGIN
     IF TG_OP IN ('UPDATE', 'DELETE') THEN
         UPDATE Ventas
         SET total_venta = COALESCE((
-                SELECT SUM(cantidad * precio_unitario)
+                SELECT SUM(COALESCE(cantidad, 0) * COALESCE(precio_unitario, 0))
                 FROM DetallesdeVenta
                 WHERE id_venta = OLD.id_venta
             ), 0)
@@ -173,7 +173,7 @@ BEGIN
     IF TG_OP IN ('INSERT', 'UPDATE') THEN
         UPDATE Ventas
         SET total_venta = COALESCE((
-                SELECT SUM(cantidad * precio_unitario)
+                SELECT SUM(COALESCE(cantidad, 0) * COALESCE(precio_unitario, 0))
                 FROM DetallesdeVenta
                 WHERE id_venta = NEW.id_venta
             ), 0)

@@ -44,4 +44,3 @@ DROP TABLE IF EXISTS Proveedores;
 
 
 DROP TABLE IF EXISTS Inventarios;
-

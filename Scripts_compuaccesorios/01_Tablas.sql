@@ -40,7 +40,8 @@ CREATE TABLE serviciosTecnicos(
     fecha_entrega TIMESTAMP,
     id_estado_servicio INT NOT NULL,
     id_catalogo_servicio INT NOT NULL,
-    id_estado_pago INT NOT NULL
+    id_estado_pago INT NOT NULL,
+    cedula_cliente VARCHAR(10) NOT NULL
 );
 
 
