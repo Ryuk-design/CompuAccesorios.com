@@ -114,6 +114,6 @@ GROUP BY s.id_tecnico, s.cedula_cliente, pc.nombre, pc.telefono;
 
 
 -- Filtro por cedula
-SELECT * FROM vw_historial_ventas_vendedor WHERE cedula_vendedor = '1000000002';
-SELECT * FROM vw_servicios_por_tecnico WHERE cedula_tecnico = '1000000001';
-SELECT * FROM vw_clientes_atendidos_por_tecnico WHERE cedula_tecnico = '1000000001';
+SELECT * FROM vw_historial_ventas_vendedor WHERE cedula_vendedor = '1000001958';
+SELECT * FROM vw_servicios_por_tecnico WHERE cedula_tecnico = '1000000594';
+SELECT * FROM vw_clientes_atendidos_por_tecnico WHERE cedula_tecnico = '1000000594';

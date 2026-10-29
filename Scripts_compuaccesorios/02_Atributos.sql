@@ -81,3 +81,15 @@ ADD CONSTRAINT chk_ventas_total
 ALTER TABLE serviciosTecnicos
 ALTER COLUMN fecha_inicio_servicio
     SET DEFAULT CURRENT_TIMESTAMP;
+
+
+-- Si no se indica, el estado del servicio al crearlo es 'En proceso'
+ALTER TABLE serviciosTecnicos
+ALTER COLUMN id_estado_servicio
+    SET DEFAULT 1;
+
+
+-- Si no se indica, el estado de pago al crearlo es 'No pagado'
+ALTER TABLE serviciosTecnicos
+ALTER COLUMN id_estado_pago
+    SET DEFAULT 2;
