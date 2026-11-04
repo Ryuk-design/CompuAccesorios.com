@@ -1,0 +1,32 @@
+-- ELIMINAR COMPONENTES
+
+DROP PROCEDURE IF EXISTS registrarPersona(VARCHAR, TEmail, TTelefono, TNombre);
+
+DROP PROCEDURE IF EXISTS registrarCliente(VARCHAR);
+
+DROP PROCEDURE IF EXISTS registrarEmpleado(VARCHAR, INT);
+
+DROP PROCEDURE IF EXISTS registrarTecnico(VARCHAR, INT, INT);
+
+DROP PROCEDURE IF EXISTS registrarVendedor(VARCHAR, INT);
+
+DROP PROCEDURE IF EXISTS registrarEspecializacion(INT, TEspecializacion);
+
+DROP PROCEDURE IF EXISTS registrarCategoria(INT, VARCHAR, VARCHAR);
+
+DROP PROCEDURE IF EXISTS registrarInventario(INT, VARCHAR);
+
+DROP PROCEDURE IF EXISTS registrarProveedor(INT, TTelefono, TEmail, VARCHAR);
+
+DROP PROCEDURE IF EXISTS registrarProducto(INT, VARCHAR, INT, INT, INT, INT, INT);
+
+DROP PROCEDURE IF EXISTS registrarCatalogoServicio(INT, VARCHAR, INT);
+
+DROP PROCEDURE IF EXISTS registrarEstadoServicio(INT, TEstado);
+
+DROP PROCEDURE IF EXISTS registrarEstadoPago(INT, TEstadoPago);
+
+DROP PROCEDURE IF EXISTS actualizarProducto(INT, VARCHAR, INT, INT);
+
+DROP PROCEDURE IF EXISTS actualizarProveedor(INT, TTelefono, TEmail, VARCHAR, BOOLEAN);
+

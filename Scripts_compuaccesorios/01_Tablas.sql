@@ -117,3 +117,4 @@ CREATE TABLE categorias(
     nombre_categoria VARCHAR(100) NOT NULL,
     descripcion_categoria VARCHAR(200) NOT NULL
 );
+
