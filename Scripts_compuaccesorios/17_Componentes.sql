@@ -232,5 +232,3 @@ BEGIN
     END IF;
 END;
 $$;
-
-
