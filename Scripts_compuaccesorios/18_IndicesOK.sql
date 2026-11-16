@@ -1,4 +1,7 @@
 -- INDICE: idx_ventas_fecha_venta
+ANALYZE;
+SET enable_seqscan = off;
+
 EXPLAIN
 SELECT * FROM ventas
 WHERE fecha_venta >= CURRENT_TIMESTAMP - INTERVAL '1 month';
@@ -38,3 +41,5 @@ EXPLAIN
 SELECT * FROM productos
 WHERE id_categoria = 1;
 -- esperado: Bitmap Index Scan on idx_productos_id_categoria
+
+RESET enable_seqscan;

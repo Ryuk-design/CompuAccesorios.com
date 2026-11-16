@@ -137,3 +137,22 @@ FROM vw_clientes_atendidos_por_tecnico
 WHERE cedula_tecnico = '1000000001'
 ORDER BY nombre_cliente;
 -- esperado: Maria Lopez 2 servicios, Sara Diaz 1 servicio
+
+TRUNCATE TABLE
+    personas,
+    empleados,
+    especializaciones,
+    tecnicos,
+    vendedores,
+    clientes,
+    estadosDeServicios,
+    estadosDePago,
+    catalogoDeServicios,
+    serviciosTecnicos,
+    categorias,
+    proveedores,
+    inventarios,
+    productos,
+    ventas,
+    detallesDeVenta
+CASCADE;
