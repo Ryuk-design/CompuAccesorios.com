@@ -123,3 +123,56 @@ FROM serviciosTecnicos s
 JOIN personas pc ON pc.cedula = s.cedula_cliente
 WHERE s.id_tecnico = '1000000594'
 GROUP BY s.id_tecnico, s.cedula_cliente, pc.nombre, pc.telefono;
+
+
+-- GERENTE
+-- CONSULTAR EL PRODUCTO MAS VENDIDO
+-- si hay empate en unidades vendidas, se muestran todos los empatados
+SELECT p.id AS id_producto,
+       p.nombre_producto,
+       c.nombre_categoria,
+       SUM(d.cantidad) AS unidades_vendidas
+FROM productos p
+JOIN categorias c ON c.id = p.id_categoria
+JOIN detallesDeVenta d ON d.id_producto = p.id
+GROUP BY p.id, p.nombre_producto, c.nombre_categoria
+ORDER BY unidades_vendidas DESC
+FETCH FIRST 1 ROW WITH TIES;
+
+
+-- CONSULTAR EL SERVICIO TECNICO MAS COMUN
+SELECT cs.id AS id_catalogo_servicio,
+       cs.descripcion_servicio,
+       COUNT(*) AS veces_solicitado
+FROM serviciosTecnicos s
+JOIN catalogoDeServicios cs ON cs.id = s.id_catalogo_servicio
+GROUP BY cs.id, cs.descripcion_servicio
+ORDER BY veces_solicitado DESC
+FETCH FIRST 1 ROW WITH TIES;
+
+
+-- CONSULTAR PRODUCTOS CON BAJO INVENTARIO
+-- Se considera bajo inventario 5 unidades o menos
+SELECT p.id AS id_producto,
+       p.nombre_producto,
+       c.nombre_categoria,
+       pr.nombre_proveedor,
+       p.cantidad_producto AS stock
+FROM productos p
+JOIN categorias c ON c.id = p.id_categoria
+JOIN proveedores pr ON pr.id = p.id_proveedor
+WHERE p.cantidad_producto <= 5
+ORDER BY p.cantidad_producto, p.nombre_producto;
+
+
+-- CONSULTAR EL PROVEEDOR MAS FRECUENTE
+SELECT pr.id AS id_proveedor,
+       pr.nombre_proveedor,
+       pr.telefono_proveedor,
+       pr.email_proveedor,
+       COUNT(p.id) AS productos_suministrados
+FROM proveedores pr
+JOIN productos p ON p.id_proveedor = pr.id
+GROUP BY pr.id, pr.nombre_proveedor, pr.telefono_proveedor, pr.email_proveedor
+ORDER BY productos_suministrados DESC
+FETCH FIRST 1 ROW WITH TIES;

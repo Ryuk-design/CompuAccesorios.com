@@ -113,7 +113,56 @@ JOIN personas pc ON pc.cedula = s.cedula_cliente
 GROUP BY s.id_tecnico, s.cedula_cliente, pc.nombre, pc.telefono;
 
 
--- Ejemplos de uso (cambiar por la cedula requerida)
--- SELECT * FROM vw_historial_ventas_vendedor WHERE cedula_vendedor = '1000001958';
--- SELECT * FROM vw_servicios_por_tecnico WHERE cedula_tecnico = '1000000594';
--- SELECT * FROM vw_clientes_atendidos_por_tecnico WHERE cedula_tecnico = '1000000594';
+-- GERENTE
+-- CONSULTAR EL PRODUCTO MAS VENDIDO
+CREATE VIEW vw_producto_mas_vendido AS
+SELECT p.id AS id_producto,
+       p.nombre_producto,
+       c.nombre_categoria,
+       SUM(d.cantidad) AS unidades_vendidas
+FROM productos p
+JOIN categorias c ON c.id = p.id_categoria
+JOIN detallesDeVenta d ON d.id_producto = p.id
+GROUP BY p.id, p.nombre_producto, c.nombre_categoria
+ORDER BY unidades_vendidas DESC
+FETCH FIRST 1 ROW WITH TIES;
+
+
+-- CONSULTAR EL SERVICIO TÉCNICO MÁS COMÚN
+CREATE VIEW vw_servicio_tecnico_mas_comun AS
+SELECT cs.id AS id_catalogo_servicio,
+       cs.descripcion_servicio,
+       COUNT(*) AS veces_solicitado
+FROM serviciosTecnicos s
+JOIN catalogoDeServicios cs ON cs.id = s.id_catalogo_servicio
+GROUP BY cs.id, cs.descripcion_servicio
+ORDER BY veces_solicitado DESC
+FETCH FIRST 1 ROW WITH TIES;
+
+
+-- CONSULTAR PRODUCTOS CON BAJO INVENTARIO
+CREATE VIEW vw_productos_bajo_inventario AS
+SELECT p.id AS id_producto,
+       p.nombre_producto,
+       c.nombre_categoria,
+       pr.nombre_proveedor,
+       p.cantidad_producto AS stock
+FROM productos p
+JOIN categorias c ON c.id = p.id_categoria
+JOIN proveedores pr ON pr.id = p.id_proveedor
+WHERE p.cantidad_producto <= 5
+ORDER BY p.cantidad_producto, p.nombre_producto;
+
+
+-- CONSULTAR EL PROVEEDOR MÁS FRECUENTE
+CREATE VIEW vw_proveedor_mas_frecuente AS
+SELECT pr.id AS id_proveedor,
+       pr.nombre_proveedor,
+       pr.telefono_proveedor,
+       pr.email_proveedor,
+       COUNT(p.id) AS productos_suministrados
+FROM proveedores pr
+JOIN productos p ON p.id_proveedor = pr.id
+GROUP BY pr.id, pr.nombre_proveedor, pr.telefono_proveedor, pr.email_proveedor
+ORDER BY productos_suministrados DESC
+FETCH FIRST 1 ROW WITH TIES;

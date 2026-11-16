@@ -9,6 +9,7 @@ ALTER TABLE empleados
 ALTER COLUMN actualmente_trabaja
     SET DEFAULT TRUE;
 
+-- Un empleado no puede tener salario negativo
 ALTER TABLE empleados
 ADD CONSTRAINT chk_empleados_salario
     CHECK (salario_empleado > 0);
