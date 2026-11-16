@@ -374,9 +374,8 @@ $$ LANGUAGE plpgsql;
 
 
 -- Modificar
-CREATE OR REPLACE FUNCTION SV_PRODUCTO.up(
-    p_id INT, p_nombre_producto VARCHAR(100), p_precio_unitario_producto INT, p_cantidad_producto INT, p_id_categoria INT, p_id_proveedor INT, p_id_inventario INT
-) RETURNS void AS $$
+CREATE OR REPLACE FUNCTION SV_PRODUCTO.up(p_id INT, p_nombre_producto VARCHAR(100), p_precio_unitario_producto INT, p_cantidad_producto INT, p_id_categoria INT, p_id_proveedor INT, p_id_inventario INT)
+    RETURNS void AS $$
 BEGIN
     UPDATE productos
     SET nombre_producto = p_nombre_producto, precio_unitario_producto = p_precio_unitario_producto, cantidad_producto = p_cantidad_producto, id_categoria = p_id_categoria, id_proveedor = p_id_proveedor, id_inventario = p_id_inventario
@@ -390,7 +389,8 @@ $$ LANGUAGE plpgsql;
 
 
 -- Eliminar
-CREATE OR REPLACE FUNCTION SV_PRODUCTO.de(p_id INT) RETURNS void AS $$
+CREATE OR REPLACE FUNCTION SV_PRODUCTO.de(p_id INT)
+    RETURNS void AS $$
 BEGIN
     DELETE FROM productos
     WHERE id = p_id;
@@ -425,7 +425,7 @@ CREATE SCHEMA IF NOT EXISTS SV_PROVEEDOR;
 
 
 -- Adicionar
-CREATE OR REPLACE FUNCTION SV_PROVEEDOR.ad(p_id INT, p_telefono_proveedor TTelefono, p_email_proveedor TEmail, p_nombre_proveedor VARCHAR)
+CREATE OR REPLACE FUNCTION SV_PROVEEDOR.ad(p_id INT, p_telefono_proveedor TTelefono, p_email_proveedor TEmail, p_nombre_proveedor VARCHAR(100))
     RETURNS void AS $$
 BEGIN
     INSERT INTO proveedores (id, telefono_proveedor, email_proveedor, nombre_proveedor)
@@ -435,7 +435,7 @@ $$ LANGUAGE plpgsql;
 
 
 -- Modificar (tambien sirve para activar o desactivar al proveedor)
-CREATE OR REPLACE FUNCTION SV_PROVEEDOR.up(p_id INT, p_telefono_proveedor TTelefono, p_email_proveedor TEmail, p_nombre_proveedor VARCHAR, p_actualmente_provee BOOLEAN)
+CREATE OR REPLACE FUNCTION SV_PROVEEDOR.up(p_id INT, p_telefono_proveedor TTelefono, p_email_proveedor TEmail, p_nombre_proveedor VARCHAR(100), p_actualmente_provee BOOLEAN)
     RETURNS void AS $$
 BEGIN
     UPDATE proveedores
@@ -488,7 +488,8 @@ CREATE SCHEMA IF NOT EXISTS SV_EMPLEADO;
 
 
 -- Adicionar tecnico
-CREATE OR REPLACE FUNCTION SV_EMPLEADO.ad_tecnico(p_cedula VARCHAR, p_email TEmail, p_telefono TTelefono, p_nombre TNombre, p_salario_empleado INT, p_comision_servicio INT, p_id_especializacion INT) RETURNS void AS $$
+CREATE OR REPLACE FUNCTION SV_EMPLEADO.ad_tecnico(p_cedula VARCHAR, p_email TEmail, p_telefono TTelefono, p_nombre TNombre, p_salario_empleado INT, p_comision_servicio INT, p_id_especializacion INT)
+    RETURNS void AS $$
 BEGIN
     INSERT INTO personas (cedula, email, telefono, nombre)
     VALUES (p_cedula, p_email, p_telefono, p_nombre)
@@ -528,7 +529,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 
--- Modificar datos del empleado (tambien sirve para marcarlo como retirado)
+-- Modificar datos del empleado
 CREATE OR REPLACE FUNCTION SV_EMPLEADO.up(p_cedula VARCHAR, p_email TEmail, p_telefono TTelefono, p_nombre TNombre, p_salario_empleado INT, p_actualmente_trabaja BOOLEAN)
     RETURNS void AS $$
 BEGIN
@@ -582,7 +583,8 @@ $$ LANGUAGE plpgsql;
 
 
 -- Eliminar
-CREATE OR REPLACE FUNCTION SV_EMPLEADO.de(p_cedula VARCHAR) RETURNS void AS $$
+CREATE OR REPLACE FUNCTION SV_EMPLEADO.de(p_cedula VARCHAR)
+    RETURNS void AS $$
 BEGIN
     DELETE FROM empleados
     WHERE cedula_empleado = p_cedula;
@@ -603,7 +605,8 @@ $$ LANGUAGE plpgsql;
 
 
 -- Consultar
-CREATE OR REPLACE FUNCTION SV_EMPLEADO.co(p_cursor REFCURSOR, p_cedula VARCHAR) RETURNS REFCURSOR AS $$
+CREATE OR REPLACE FUNCTION SV_EMPLEADO.co(p_cursor REFCURSOR, p_cedula VARCHAR)
+    RETURNS REFCURSOR AS $$
 BEGIN
     OPEN p_cursor FOR
         SELECT p.cedula, p.nombre, p.email, p.telefono,
@@ -621,8 +624,6 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-
--- VENDEDOR Y TECNICO
 
 -- MANTENER CLIENTE
 CREATE SCHEMA IF NOT EXISTS SV_CLIENTE;
@@ -785,7 +786,7 @@ $$ LANGUAGE plpgsql;
 
 
 -- Consultar venta
-CREATE OR REPLACE FUNCTION SV_VENTA.co(p_cursor REFCURSOR,p_id INT)
+CREATE OR REPLACE FUNCTION SV_VENTA.co(p_cursor REFCURSOR, p_id INT)
     RETURNS REFCURSOR AS $$
 BEGIN
     OPEN p_cursor FOR
@@ -802,7 +803,8 @@ $$ LANGUAGE plpgsql;
 
 
 -- Consultar los productos de una venta
-CREATE OR REPLACE FUNCTION SV_VENTA.co_detalle(p_cursor REFCURSOR, p_id_venta INT) RETURNS REFCURSOR AS $$
+CREATE OR REPLACE FUNCTION SV_VENTA.co_detalle(p_cursor REFCURSOR, p_id_venta INT)
+    RETURNS REFCURSOR AS $$
 BEGIN
     OPEN p_cursor FOR
         SELECT d.id_producto, p.nombre_producto, d.cantidad, d.precio_unitario,
@@ -867,7 +869,8 @@ $$ LANGUAGE plpgsql;
 
 
 -- Modificar el estado de pago del servicio
-CREATE OR REPLACE FUNCTION SV_SERVICIOTECNICO.up_pago( p_id INT, p_id_estado_pago INT) RETURNS void AS $$
+CREATE OR REPLACE FUNCTION SV_SERVICIOTECNICO.up_pago( p_id INT, p_id_estado_pago INT)
+    RETURNS void AS $$
 BEGIN
     UPDATE serviciosTecnicos
     SET id_estado_pago = p_id_estado_pago
