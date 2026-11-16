@@ -1,99 +1,92 @@
--- PRUEBAS DE COMPONENTES
+BEGIN;
 
--- REGISTRAR PERSONA
-CALL registrarPersona(
-    '9000000001',
-    'persona9001@correo.com',
-    '3009000001',
-    'Andres Ramirez'
+-- Crear datos necesarios para la prueba
+SELECT SV_CATEGORIA.ad(
+    986001, 'Accesorios Prueba', 'Categoria de prueba'
 );
 
-SELECT * FROM Personas WHERE cedula = '9000000001';
-
-
--- REGISTRAR CLIENTE
-CALL registrarCliente('9000000001');
-
-SELECT * FROM Clientes WHERE cedula_cliente = '9000000001';
-
-
--- REGISTRAR EMPLEADO
-CALL registrarEmpleado('9000000001', 1800000);
-
-SELECT * FROM Empleados WHERE cedula_empleado = '9000000001';
-
-
--- REGISTRAR TECNICO
-CALL registrarTecnico('9000000001', 5000, 1);
-
-SELECT * FROM Tecnicos WHERE cedula_tecnico = '9000000001';
-
-
--- REGISTRAR VENDEDOR
--- Se usa otra persona para no mezclar tecnico y vendedor
-CALL registrarPersona(
-    '9000000002',
-    'persona9002@correo.com',
-    '3009000002',
-    'Daniel Torres'
+SELECT SV_INVENTARIO.ad(
+    986001, 'Inventario de prueba'
 );
 
-CALL registrarEmpleado('9000000002', 1900000);
-CALL registrarVendedor('9000000002', 3000);
-
-SELECT * FROM Vendedores WHERE cedula_vendedor = '9000000002';
-
-
--- REGISTRAR CATEGORIA
-CALL registrarCategoria(900, 'Accesorios nuevos', 'Accesorios para computadores');
-
-SELECT * FROM Categorias WHERE id = 900;
-
-
--- REGISTRAR INVENTARIO
-CALL registrarInventario(900, 'Inventario de pruebas');
-
-SELECT * FROM Inventarios WHERE id = 900;
-
-
--- REGISTRAR PROVEEDOR
-CALL registrarProveedor(
-    900,
-    '3109000001',
-    'proveedor900@correo.com',
-    'Proveedor de pruebas'
+SELECT SV_PROVEEDOR.ad(
+    986001, '3109860001',
+    'proveedor986001@correo.com', 'Proveedor Prueba'
 );
 
-SELECT * FROM Proveedores WHERE id = 900;
-
-
--- REGISTRAR PRODUCTO
-CALL registrarProducto(
-    900,
-    'Teclado de prueba',
-    80000,
-    15,
-    900,
-    900,
-    900
+-- Crear producto con 10 unidades
+SELECT SV_PRODUCTO.ad(
+    986001, 'Teclado Prueba',
+    25000, 10, 986001, 986001, 986001
 );
 
-SELECT * FROM Productos WHERE id = 900;
-
-
--- ACTUALIZAR PRODUCTO
-CALL actualizarProducto(900, 'Teclado actualizado', 85000, 20);
-
-SELECT * FROM Productos WHERE id = 900;
-
-
--- ACTUALIZAR PROVEEDOR
-CALL actualizarProveedor(
-    900,
-    '3109000002',
-    'proveedoractualizado@correo.com',
-    'Proveedor actualizado',
-    TRUE
+-- Crear vendedor
+SELECT SV_EMPLEADO.ad_vendedor(
+    '9860000001', 'vendedor986001@correo.com',
+    '3119860001', 'Vendedor Prueba',
+    2000000, 3000
 );
 
-SELECT * FROM Proveedores WHERE id = 900;
+-- Crear cliente
+SELECT SV_CLIENTE.ad(
+    '9860000002', 'cliente986002@correo.com',
+    '3129860002', 'Cliente Prueba'
+);
+
+-- Registrar venta
+SELECT SV_VENTA.ad(
+    986001, '9860000002', '9860000001'
+);
+
+-- Probar los componentes y sus triggers
+DO $$
+BEGIN
+
+    -- Agregar 3 unidades a la venta
+    PERFORM SV_VENTA.ad_detalle(986001, 986001, 3);
+
+    IF (SELECT cantidad_producto FROM productos
+        WHERE id = 986001) IS DISTINCT FROM 7 THEN
+        RAISE EXCEPTION 'Error al descontar inventario';
+    END IF;
+
+    IF (SELECT total_venta FROM ventas
+        WHERE id = 986001) IS DISTINCT FROM 75000 THEN
+        RAISE EXCEPTION 'Error al calcular total';
+    END IF;
+
+    RAISE NOTICE 'OK: Venta registrada correctamente';
+    RAISE NOTICE 'OK: Inventario descontado a 7 unidades';
+    RAISE NOTICE 'OK: Total de venta = 75000';
+
+    -- Modificar cantidad vendida a 5
+    PERFORM SV_VENTA.up_detalle(986001, 986001, 5);
+
+    IF (SELECT cantidad_producto FROM productos
+        WHERE id = 986001) IS DISTINCT FROM 5 THEN
+        RAISE EXCEPTION 'Error al actualizar inventario';
+    END IF;
+
+    IF (SELECT total_venta FROM ventas
+        WHERE id = 986001) IS DISTINCT FROM 125000 THEN
+        RAISE EXCEPTION 'Error al actualizar total';
+    END IF;
+
+    RAISE NOTICE 'OK: Cantidad actualizada a 5';
+    RAISE NOTICE 'OK: Inventario actualizado a 5';
+    RAISE NOTICE 'OK: Total actualizado a 125000';
+
+    -- Eliminar detalle de venta
+    PERFORM SV_VENTA.de_detalle(986001, 986001);
+
+    IF (SELECT cantidad_producto FROM productos
+        WHERE id = 986001) IS DISTINCT FROM 10 THEN
+        RAISE EXCEPTION 'Error al devolver inventario';
+    END IF;
+
+    RAISE NOTICE 'OK: Inventario restaurado a 10';
+
+END $$;
+
+-- Deshacer los cambios de la prueba
+ROLLBACK;

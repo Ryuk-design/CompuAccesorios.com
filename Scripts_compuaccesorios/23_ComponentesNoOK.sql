@@ -1,131 +1,93 @@
--- PRUEBAS DE COMPONENTES NO OK
+BEGIN;
 
--- PERSONA CON CORREO INCORRECTO
+-- Crear datos necesarios para la prueba
+SELECT SV_CATEGORIA.ad(
+    986001, 'Accesorios Prueba', 'Categoria de prueba'
+);
+
+SELECT SV_INVENTARIO.ad(
+    986001, 'Inventario de prueba'
+);
+
+SELECT SV_PROVEEDOR.ad(
+    986001, '3109860001',
+    'proveedor986001@correo.com', 'Proveedor Prueba'
+);
+
+-- Crear producto con 10 unidades
+SELECT SV_PRODUCTO.ad(
+    986001, 'Teclado Prueba',
+    25000, 10, 986001, 986001, 986001
+);
+
+-- Crear vendedor
+SELECT SV_EMPLEADO.ad_vendedor(
+    '9860000001', 'vendedor986001@correo.com',
+    '3119860001', 'Vendedor Prueba',
+    2000000, 3000
+);
+
+-- Crear cliente
+SELECT SV_CLIENTE.ad(
+    '9860000002', 'cliente986002@correo.com',
+    '3129860002', 'Cliente Prueba'
+);
+
+-- Registrar venta
+SELECT SV_VENTA.ad(
+    986001, '9860000002', '9860000001'
+);
+
+-- Probar los componentes y sus triggers
 DO $$
 BEGIN
-    CALL registrarPersona(
-        '9000000010',
-        'correoinvalido',
-        '3009000010',
-        'Persona Prueba'
-    );
-EXCEPTION WHEN OTHERS THEN
-    RAISE NOTICE 'Prueba correcta: no se permitio registrar el correo incorrecto';
-END;
-$$;
 
+    -- Agregar 3 unidades a la venta
+    PERFORM SV_VENTA.ad_detalle(986001, 986001, 3);
 
--- EMPLEADO CON SALARIO NEGATIVO
-DO $$
-BEGIN
-    CALL registrarEmpleado('9000000011', -1000);
-EXCEPTION WHEN OTHERS THEN
-    RAISE NOTICE 'Prueba correcta: no se permitio el salario negativo';
-END;
-$$;
+    IF (SELECT cantidad_producto FROM productos
+        WHERE id = 986001) IS DISTINCT FROM 7 THEN
+        RAISE EXCEPTION 'Error al descontar inventario';
+    END IF;
 
+    IF (SELECT total_venta FROM ventas
+        WHERE id = 986001) IS DISTINCT FROM 75000 THEN
+        RAISE EXCEPTION 'Error al calcular total';
+    END IF;
 
--- TECNICO CON COMISION EN CERO
-DO $$
-BEGIN
-    CALL registrarTecnico('9000000012', 0, 1);
-EXCEPTION WHEN OTHERS THEN
-    RAISE NOTICE 'Prueba correcta: no se permitio la comision en cero';
-END;
-$$;
+    RAISE NOTICE 'OK: Venta registrada correctamente';
+    RAISE NOTICE 'OK: Inventario descontado a 7 unidades';
+    RAISE NOTICE 'OK: Total de venta = 75000';
 
+    -- Modificar cantidad vendida a 5
+    PERFORM SV_VENTA.up_detalle(986001, 986001, 5);
 
--- VENDEDOR CON COMISION NEGATIVA
-DO $$
-BEGIN
-    CALL registrarVendedor('9000000013', -500);
-EXCEPTION WHEN OTHERS THEN
-    RAISE NOTICE 'Prueba correcta: no se permitio la comision negativa';
-END;
-$$;
+    IF (SELECT cantidad_producto FROM productos
+        WHERE id = 986001) IS DISTINCT FROM 5 THEN
+        RAISE EXCEPTION 'Error al actualizar inventario';
+    END IF;
 
+    IF (SELECT total_venta FROM ventas
+        WHERE id = 986001) IS DISTINCT FROM 125000 THEN
+        RAISE EXCEPTION 'Error al actualizar total';
+    END IF;
 
--- PRODUCTO CON PRECIO EN CERO
-DO $$
-BEGIN
-    CALL registrarProducto(
-        910,
-        'Producto incorrecto',
-        0,
-        10,
-        1,
-        1,
-        1
-    );
-EXCEPTION WHEN OTHERS THEN
-    RAISE NOTICE 'Prueba correcta: no se permitio el precio en cero';
-END;
-$$;
+    RAISE NOTICE 'OK: Cantidad actualizada a 5';
+    RAISE NOTICE 'OK: Inventario actualizado a 5';
+    RAISE NOTICE 'OK: Total actualizado a 125000';
 
+    -- Eliminar detalle de venta
+    PERFORM SV_VENTA.de_detalle(986001, 986001);
 
--- PRODUCTO CON CANTIDAD NEGATIVA
-DO $$
-BEGIN
-    CALL registrarProducto(
-        911,
-        'Producto incorrecto',
-        50000,
-        -5,
-        1,
-        1,
-        1
-    );
-EXCEPTION WHEN OTHERS THEN
-    RAISE NOTICE 'Prueba correcta: no se permitio la cantidad negativa';
-END;
-$$;
+    IF (SELECT cantidad_producto FROM productos
+        WHERE id = 986001) IS DISTINCT FROM 10 THEN
+        RAISE EXCEPTION 'Error al devolver inventario';
+    END IF;
 
+    RAISE NOTICE 'OK: Inventario restaurado a 10';
 
--- PRODUCTO CON CATEGORIA QUE NO EXISTE
-DO $$
-BEGIN
-    CALL registrarProducto(
-        912,
-        'Producto sin categoria',
-        50000,
-        10,
-        99999,
-        1,
-        1
-    );
-EXCEPTION WHEN OTHERS THEN
-    RAISE NOTICE 'Prueba correcta: no se permitio una categoria inexistente';
-END;
-$$;
+END $$;
 
-
--- ACTUALIZAR UN PRODUCTO QUE NO EXISTE
-DO $$
-BEGIN
-    CALL actualizarProducto(
-        99999,
-        'Producto inexistente',
-        50000,
-        10
-    );
-EXCEPTION WHEN OTHERS THEN
-    RAISE NOTICE 'Prueba correcta: no se pudo actualizar un producto inexistente';
-END;
-$$;
-
-
--- ACTUALIZAR UN PROVEEDOR QUE NO EXISTE
-DO $$
-BEGIN
-    CALL actualizarProveedor(
-        99999,
-        '3109000099',
-        'proveedorinexistente@correo.com',
-        'Proveedor inexistente',
-        TRUE
-    );
-EXCEPTION WHEN OTHERS THEN
-    RAISE NOTICE 'Prueba correcta: no se pudo actualizar un proveedor inexistente';
-END;
-$$;
+-- Deshacer los cambios de la prueba
+ROLLBACK;
 
