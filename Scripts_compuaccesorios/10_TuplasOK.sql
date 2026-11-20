@@ -1,3 +1,5 @@
+BEGIN;
+
 -- PREPARACIÓN
 INSERT INTO personas (cedula, email, telefono, nombre)
 VALUES ('1000000001', 'tecnico@correo.com', '3001234567', 'Carlos Perez');
@@ -21,15 +23,24 @@ INSERT INTO catalogoDeServicios (id, descripcion_servicio, precio_base)
 VALUES (1, 'Limpieza general de PC', 30000);
 
 
+INSERT INTO personas (cedula, email, telefono, nombre)
+VALUES ('1000000002', 'cliente@correo.com', '3007654321', 'Laura Gomez');
+
+INSERT INTO clientes (cedula_cliente)
+VALUES ('1000000002');
+
+
 -- RESTRICCIÓN 1: fecha_estimada_entrega >= fecha_inicio_servicio
 
 -- fecha estimada igual a la fecha de inicio
-INSERT INTO serviciosTecnicos (id, id_tecnico, fecha_inicio_servicio, fecha_estimada_entrega, id_estado_servicio, id_catalogo_servicio, id_estado_pago)
-VALUES (1, '1000000001', '2026-10-18 09:00', '2026-10-18 09:00', 1, 1, 1);
+INSERT INTO serviciosTecnicos (id, id_tecnico, fecha_inicio_servicio, fecha_estimada_entrega, id_estado_servicio, id_catalogo_servicio, id_estado_pago, cedula_cliente)
+VALUES (1, '1000000001', '2026-10-18 09:00', '2026-10-18 09:00', 1, 1, 1, '1000000002');
 
 
 -- RESTRICCIÓN 2: fecha_entrega >= fecha_inicio_servicio
 
 -- fecha de entrega igual a la fecha de inicio
-INSERT INTO serviciosTecnicos (id, id_tecnico, fecha_inicio_servicio, fecha_estimada_entrega, fecha_entrega, id_estado_servicio, id_catalogo_servicio, id_estado_pago)
-VALUES (3, '1000000001', '2026-10-18 09:00', '2026-10-19 09:00', '2026-10-18 09:00', 1, 1, 1);
+INSERT INTO serviciosTecnicos (id, id_tecnico, fecha_inicio_servicio, fecha_estimada_entrega, fecha_entrega, id_estado_servicio, id_catalogo_servicio, id_estado_pago, cedula_cliente)
+VALUES (3, '1000000001', '2026-10-18 09:00', '2026-10-19 09:00', '2026-10-18 09:00', 1, 1, 1, '1000000002');
+
+ROLLBACK;
