@@ -46,76 +46,69 @@ VALUES (1, 'Bodega principal');
 INSERT INTO productos (id, nombre_producto, precio_unitario_producto, cantidad_producto, id_categoria, id_proveedor, id_inventario) VALUES
 (2, 'Teclado USB', 25000, 10, 1, 1, 1),
 (7, 'Parlantes',   25000, 10, 1, 1, 1);
-
+SAVEPOINT base_pruebas;
 
 
 -- PRUEBA 1: la cedula de una persona no se puede modificar
 
-SAVEPOINT sp_prueba_1;
 UPDATE personas SET cedula = '1999999999' WHERE cedula = '1000000005';
 -- esperado: La cedula de una persona no se puede modificar
-ROLLBACK TO SAVEPOINT sp_prueba_1;
+ROLLBACK TO SAVEPOINT base_pruebas;
 
 
 
 -- PRUEBA 2: un tecnico no puede ser vendedor
 
-SAVEPOINT sp_prueba_2;
 INSERT INTO tecnicos (cedula_tecnico, comision_servicio, id_especializacion)
 VALUES ('1000000002', 5000, 1);
 -- esperado: El empleado 1000000002 ya es vendedor, no puede ser tecnico
-ROLLBACK TO SAVEPOINT sp_prueba_2;
+ROLLBACK TO SAVEPOINT base_pruebas;
 
 
 
 -- PRUEBA 3: un vendedor no puede ser tecnico
 
-SAVEPOINT sp_prueba_3;
 INSERT INTO vendedores (cedula_vendedor, comision_venta)
 VALUES ('1000000001', 3000);
 -- esperado: El empleado 1000000001 ya es tecnico, no puede ser vendedor
-ROLLBACK TO SAVEPOINT sp_prueba_3;
+ROLLBACK TO SAVEPOINT base_pruebas;
 
 
 
 -- PRUEBA 4: un servicio Entregado debe tener fecha de entrega
 
-SAVEPOINT sp_prueba_4;
 INSERT INTO serviciosTecnicos (id, id_tecnico, fecha_inicio_servicio, fecha_estimada_entrega, id_estado_servicio, id_catalogo_servicio, id_estado_pago, cedula_cliente)
 VALUES (102, '1000000001', '2026-10-18 09:00', '2026-10-19 09:00', 2, 1, 1, '1000000003');
 -- esperado: Un servicio en estado Entregado debe tener fecha de entrega
-ROLLBACK TO SAVEPOINT sp_prueba_4;
+ROLLBACK TO SAVEPOINT base_pruebas;
 
 
 
 -- PRUEBA 5: no se elimina un servicio en estado Entregado
 
-SAVEPOINT sp_prueba_5;
 INSERT INTO serviciosTecnicos (id, id_tecnico, fecha_inicio_servicio, fecha_estimada_entrega, fecha_entrega, id_estado_servicio, id_catalogo_servicio, id_estado_pago, cedula_cliente)
 VALUES (104, '1000000001', '2026-10-18 09:00', '2026-10-19 09:00', '2026-10-19 10:00', 2, 1, 1, '1000000003');
 
 DELETE FROM serviciosTecnicos WHERE id = 104;
 -- esperado: No se puede eliminar un servicio en estado Entregado
-ROLLBACK TO SAVEPOINT sp_prueba_5;
+ROLLBACK TO SAVEPOINT base_pruebas;
 
 
 
 -- PRUEBA 6: no se vende mas de lo disponible (INSERT)
 
-SAVEPOINT sp_prueba_6;
 INSERT INTO ventas (id, total_venta, cedula_cliente, cedula_vendedor)
 VALUES (202, 0, '1000000003', '1000000002');
 
 INSERT INTO detallesDeVenta (id_venta, id_producto, cantidad, precio_unitario)
 VALUES (202, 2, 11, 25000);
 -- esperado: Existencias insuficientes del producto 2: disponibles 10, solicitadas 11
-ROLLBACK TO SAVEPOINT sp_prueba_6;
+ROLLBACK TO SAVEPOINT base_pruebas;
 
 
 
 -- PRUEBA 7: no se vende mas de lo disponible
 
-SAVEPOINT sp_prueba_7;
 INSERT INTO ventas (id, total_venta, cedula_cliente, cedula_vendedor)
 VALUES (208, 0, '1000000003', '1000000002');
 
@@ -124,8 +117,7 @@ VALUES (208, 7, 5, 25000);
 
 UPDATE detallesDeVenta SET cantidad = 20 WHERE id_venta = 208 AND id_producto = 7;
 -- esperado: Existencias insuficientes del producto 7: disponibles 10, solicitadas 20
-ROLLBACK TO SAVEPOINT sp_prueba_7;
+ROLLBACK TO SAVEPOINT base_pruebas;
 
 
--- DESHACER TODA LA PREPARACIÓN
 ROLLBACK;

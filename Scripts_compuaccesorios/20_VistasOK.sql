@@ -1,3 +1,5 @@
+BEGIN;
+
 -- PREPARACIÓN
 -- Datos de referencia (el poblar ya los tiene, por eso ON CONFLICT DO NOTHING)
 INSERT INTO especializaciones (id, especializacion) VALUES (5, 'Redes y Conectividad') ON CONFLICT DO NOTHING;
@@ -175,22 +177,4 @@ SELECT nombre_proveedor, productos_suministrados
 FROM vw_proveedor_mas_frecuente;
 -- esperado: VT Proveedor Uno, 145
 
-
-TRUNCATE TABLE
-    personas,
-    empleados,
-    especializaciones,
-    tecnicos,
-    vendedores,
-    clientes,
-    estadosDeServicios,
-    estadosDePago,
-    catalogoDeServicios,
-    serviciosTecnicos,
-    categorias,
-    proveedores,
-    inventarios,
-    productos,
-    ventas,
-    detallesdeventa
-CASCADE;
+ROLLBACK;

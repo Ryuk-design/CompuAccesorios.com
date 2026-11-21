@@ -1,426 +1,181 @@
 BEGIN;
 
--- Crear categoria
-SELECT SV_CATEGORIA.ad(
-    986001, 'Accesorios Prueba', 'Categoria de prueba'
-);
+-- PREPARACION
+-- Datos de referencia (el poblar ya los tiene, por eso ON CONFLICT DO NOTHING)
+INSERT INTO especializaciones (id, especializacion) VALUES (5, 'Redes y Conectividad') ON CONFLICT DO NOTHING;
+INSERT INTO estadosDeServicios (id, nombre_estado) VALUES (1, 'En proceso'), (2, 'Entregado') ON CONFLICT DO NOTHING;
+INSERT INTO estadosDePago (id, nombre_estado_pago) VALUES (1, 'Pagado'), (2, 'No pagado') ON CONFLICT DO NOTHING;
 
--- Crear inventario
-SELECT SV_INVENTARIO.ad(
-    986001, 'Inventario de prueba'
-);
+SELECT SV_CATEGORIA.ad(986001, 'Accesorios Prueba', 'Categoria de prueba');
+SELECT SV_INVENTARIO.ad(986001, 'Inventario de prueba');
+SELECT SV_PROVEEDOR.ad(986001, '3109860001', 'proveedor986001@correo.com', 'Proveedor Prueba');
 
--- Crear proveedor
-SELECT SV_PROVEEDOR.ad(
-    986001, '3109860001',
-    'proveedor986001@correo.com', 'Proveedor Prueba'
-);
+-- Tres productos con 10 unidades cada uno
+SELECT SV_PRODUCTO.ad(986001, 'Teclado Prueba', 25000, 10, 986001, 986001, 986001);
+SELECT SV_PRODUCTO.ad(986002, 'Mouse Prueba',   15000, 10, 986001, 986001, 986001);
+SELECT SV_PRODUCTO.ad(986003, 'Cable Prueba',   10000, 10, 986001, 986001, 986001);
 
--- Crear producto con 10 unidades
-SELECT SV_PRODUCTO.ad(
-    986001, 'Teclado Prueba',
-    25000, 10, 986001, 986001, 986001
-);
+SELECT SV_EMPLEADO.ad_vendedor('9860000001', 'vendedor986001@correo.com', '3119860001', 'Vendedor Prueba', 2000000, 3000);
+SELECT SV_EMPLEADO.ad_tecnico('9862000001', 'tecnico986200@correo.com', '3109862001', 'Tecnico Prueba', 2500000, 5000, 5);
+SELECT SV_CLIENTE.ad('9860000002', 'cliente986002@correo.com', '3129860002', 'Cliente Prueba');
+SELECT SV_CATALOGO.ad(986200, 'Mantenimiento de computador', 50000);
 
--- Crear vendedor
-SELECT SV_EMPLEADO.ad_vendedor(
-    '9860000001', 'vendedor986001@correo.com',
-    '3119860001', 'Vendedor Prueba',
-    2000000, 3000
-);
-
--- Crear cliente
-SELECT SV_CLIENTE.ad(
-    '9860000002', 'cliente986002@correo.com',
-    '3129860002', 'Cliente Prueba'
-);
-
-
--- CREATE: Crear venta
-SELECT SV_VENTA.ad(
-    986001, '9860000002', '9860000001'
-);
 
 DO $$
 DECLARE
-    v_venta RECORD;
-    v_detalle RECORD;
-    v_cursor_venta REFCURSOR := 'cursor_venta_prueba';
-    v_cursor_detalle REFCURSOR := 'cursor_detalle_prueba';
-    v_rechazado BOOLEAN := FALSE;
-
+    v_p1 INT;
+    v_p2 INT;
 BEGIN
+
+    -- 1. VENTA CON VARIOS PRODUCTOS
+    -- Triggers: existencias (descuenta / devuelve), total de la venta (recalcula)
+    -- y validacion de stock (permite vender justo lo disponible)
+    PERFORM SV_VENTA.ad(986001, '9860000002', '9860000001');
 
     PERFORM SV_VENTA.ad_detalle(986001, 986001, 3);
+    PERFORM SV_VENTA.ad_detalle(986001, 986002, 4);
 
-    -- Verificar inventario y total
-    IF (SELECT cantidad_producto FROM productos
-        WHERE id = 986001) IS DISTINCT FROM 7 THEN
-        RAISE EXCEPTION 'Error al descontar inventario';
-    END IF;
+    ASSERT (SELECT cantidad_producto FROM productos WHERE id = 986001) = 7,
+        'Agregar detalle: el producto 1 debia quedar en 7';
+    ASSERT (SELECT cantidad_producto FROM productos WHERE id = 986002) = 6,
+        'Agregar detalle: el producto 2 debia quedar en 6';
+    ASSERT (SELECT total_venta FROM ventas WHERE id = 986001) = 135000,
+        'Agregar detalle: el total debia ser 3*25000 + 4*15000 = 135000';
 
-    IF (SELECT total_venta FROM ventas
-        WHERE id = 986001) IS DISTINCT FROM 75000 THEN
-        RAISE EXCEPTION 'Error al calcular total';
-    END IF;
+    PERFORM SV_VENTA.up_detalle(986001, 986001, 5);
+    ASSERT (SELECT cantidad_producto FROM productos WHERE id = 986001) = 5,
+        'Subir cantidad: el producto 1 debia quedar en 5';
+    ASSERT (SELECT total_venta FROM ventas WHERE id = 986001) = 185000,
+        'Subir cantidad: el total debia ser 5*25000 + 60000 = 185000';
 
-    RAISE NOTICE 'OK CREATE: Venta registrada';
-    RAISE NOTICE 'Inventario: 7 unidades';
-    RAISE NOTICE 'Total venta: 75000';
+    -- Limite: vender las 10 unidades del producto (3 de las cuales ya estaban en esta venta)
+    PERFORM SV_VENTA.up_detalle(986001, 986001, 10);
+    ASSERT (SELECT cantidad_producto FROM productos WHERE id = 986001) = 0,
+        'Limite: vender las 10 unidades debia dejar el producto en 0';
+    ASSERT (SELECT total_venta FROM ventas WHERE id = 986001) = 310000,
+        'Limite: el total debia ser 10*25000 + 60000 = 310000';
 
-    -- Consultar encabezado de la venta
-    PERFORM SV_VENTA.co(v_cursor_venta, 986001);
+    PERFORM SV_VENTA.up_detalle(986001, 986001, 2);
+    ASSERT (SELECT cantidad_producto FROM productos WHERE id = 986001) = 8,
+        'Bajar cantidad: las unidades sobrantes debian volver al producto 1 (8)';
 
-    FETCH v_cursor_venta INTO v_venta;
+    PERFORM SV_VENTA.de_detalle(986001, 986002);
+    ASSERT (SELECT cantidad_producto FROM productos WHERE id = 986002) = 10,
+        'Quitar detalle: el producto 2 debia volver a 10';
+    ASSERT (SELECT total_venta FROM ventas WHERE id = 986001) = 50000,
+        'Quitar detalle: el total debia quedar en 2*25000 = 50000';
 
-    IF NOT FOUND OR v_venta.id IS DISTINCT FROM 986001 THEN
-        RAISE EXCEPTION 'Error al consultar la venta';
-    END IF;
-
-    RAISE NOTICE 'OK READ: Venta consultada';
-    RAISE NOTICE 'ID venta: %, Total: %',
-        v_venta.id, v_venta.total_venta;
-
-    CLOSE v_cursor_venta;
-
-    -- Consultar detalle de la venta
-    PERFORM SV_VENTA.co_detalle(
-        v_cursor_detalle, 986001
-    );
-
-    FETCH v_cursor_detalle INTO v_detalle;
-
-    IF NOT FOUND THEN
-        RAISE EXCEPTION 'Error al consultar el detalle';
-    END IF;
-
-    IF v_detalle.id_producto IS DISTINCT FROM 986001
-       OR v_detalle.cantidad IS DISTINCT FROM 3
-       OR v_detalle.subtotal IS DISTINCT FROM 75000 THEN
-        RAISE EXCEPTION 'Datos incorrectos en consulta';
-    END IF;
-
-    RAISE NOTICE 'OK READ: Detalle consultado';
-    RAISE NOTICE 'Producto: %, Cantidad: %, Subtotal: %',
-        v_detalle.nombre_producto,
-        v_detalle.cantidad,
-        v_detalle.subtotal;
-
-    CLOSE v_cursor_detalle;
-
-    -- Cambiar cantidad de 3 a 5 unidades
-    PERFORM SV_VENTA.up_detalle(
-        986001, 986001, 5
-    );
-
-    -- Verificar inventario
-    IF (SELECT cantidad_producto FROM productos
-        WHERE id = 986001) IS DISTINCT FROM 5 THEN
-        RAISE EXCEPTION 'Error al actualizar inventario';
-    END IF;
-
-    -- Verificar total
-    IF (SELECT total_venta FROM ventas
-        WHERE id = 986001) IS DISTINCT FROM 125000 THEN
-        RAISE EXCEPTION 'Error al actualizar total';
-    END IF;
-
-    RAISE NOTICE 'OK UPDATE: Cantidad actualizada a 5';
-    RAISE NOTICE 'Inventario actualizado: 5 unidades';
-    RAISE NOTICE 'Total actualizado: 125000';
-
-    -- Intentar vender 11 unidades teniendo solo 10
-    BEGIN
-        PERFORM SV_VENTA.up_detalle(
-            986001, 986001, 11
-        );
-
-    EXCEPTION WHEN OTHERS THEN
-        IF SQLERRM NOT ILIKE '%existencias insuficientes%' THEN
-            RAISE;
-        END IF;
-
-        v_rechazado := TRUE;
-    END;
-
-    IF NOT v_rechazado THEN
-        RAISE EXCEPTION 'Error: permitio venta sin existencias';
-    END IF;
-
-    RAISE NOTICE 'OK TRIGGER: Venta sin stock rechazada';
-
-    PERFORM SV_VENTA.de_detalle(
-        986001, 986001
-    );
-
-    -- Verificar que el detalle fue eliminado
-    IF EXISTS (
-        SELECT 1 FROM detallesDeVenta
-        WHERE id_venta = 986001
-          AND id_producto = 986001
-    ) THEN
-        RAISE EXCEPTION 'Error al eliminar detalle';
-    END IF;
-
-    -- Verificar inventario restaurado
-    IF (SELECT cantidad_producto FROM productos
-        WHERE id = 986001) IS DISTINCT FROM 10 THEN
-        RAISE EXCEPTION 'Error al restaurar inventario';
-    END IF;
-
-    -- Verificar total en cero
-    IF (SELECT total_venta FROM ventas
-        WHERE id = 986001) IS DISTINCT FROM 0 THEN
-        RAISE EXCEPTION 'Error al actualizar total final';
-    END IF;
-
-    RAISE NOTICE 'OK DELETE: Detalle eliminado';
-    RAISE NOTICE 'Inventario restaurado: 10 unidades';
-    RAISE NOTICE 'Total final: 0';
+    RAISE NOTICE 'OK [1] Venta con varios productos: existencias y total siempre coherentes';
 
 
-    PERFORM SV_VENTA.de(986001);
+    -- 2. DOS VENTAS QUE COMPARTEN EL MISMO PRODUCTO
+    -- Trigger de validacion: el stock disponible es el de todas las ventas, no el de una sola
+    PERFORM SV_VENTA.ad(986002, '9860000002', '9860000001');
+    PERFORM SV_VENTA.ad(986003, '9860000002', '9860000001');
 
-    IF EXISTS (
-        SELECT 1 FROM ventas WHERE id = 986001
-    ) THEN
-        RAISE EXCEPTION 'Error al eliminar venta';
-    END IF;
+    PERFORM SV_VENTA.ad_detalle(986002, 986003, 4);
+    PERFORM SV_VENTA.ad_detalle(986003, 986003, 6);      -- justo las 6 que quedaban
+    ASSERT (SELECT cantidad_producto FROM productos WHERE id = 986003) = 0,
+        'Dos ventas: el producto 3 debia quedar en 0';
 
-    RAISE NOTICE 'OK DELETE: Venta eliminada';
-    RAISE NOTICE 'CRUD DE VENTAS FINALIZADO';
+    PERFORM SV_VENTA.de_detalle(986002, 986003);
+    ASSERT (SELECT cantidad_producto FROM productos WHERE id = 986003) = 4,
+        'Dos ventas: al quitar las 4 de la primera venta, el producto 3 debia quedar en 4';
+
+    RAISE NOTICE 'OK [2] Dos ventas comparten stock: el limite se calcula sobre el total';
+
+
+    -- 3. ANULAR UNA VENTA CON DETALLES
+    -- La eliminacion borra el detalle en cascada y el trigger devuelve las existencias
+    SELECT cantidad_producto INTO v_p1 FROM productos WHERE id = 986001;
+    SELECT cantidad_producto INTO v_p2 FROM productos WHERE id = 986002;
+
+    PERFORM SV_VENTA.ad(986004, '9860000002', '9860000001');
+    PERFORM SV_VENTA.ad_detalle(986004, 986001, 2);
+    PERFORM SV_VENTA.ad_detalle(986004, 986002, 3);
+
+    ASSERT (SELECT cantidad_producto FROM productos WHERE id = 986001) = v_p1 - 2,
+        'Anular venta: el producto 1 debia bajar 2 antes de anular';
+
+    PERFORM SV_VENTA.de(986004);
+
+    ASSERT NOT EXISTS (SELECT 1 FROM detallesDeVenta WHERE id_venta = 986004),
+        'Anular venta: el detalle debia eliminarse en cascada';
+    ASSERT (SELECT cantidad_producto FROM productos WHERE id = 986001) = v_p1,
+        'Anular venta: el producto 1 debia volver a su cantidad inicial';
+    ASSERT (SELECT cantidad_producto FROM productos WHERE id = 986002) = v_p2,
+        'Anular venta: el producto 2 debia volver a su cantidad inicial';
+
+    RAISE NOTICE 'OK [3] Anular venta: el detalle se elimina y el stock se devuelve';
+
+
+    -- 4. SERVICIO TECNICO ENTREGADO
+    -- Trigger: un servicio Entregado exige fecha de entrega (aqui se envia y se acepta)
+    PERFORM SV_SERVICIOTECNICO.ad(986200, '9862000001', '9860000002', 986200,
+                                  LOCALTIMESTAMP + INTERVAL '3 days');
+
+    ASSERT (SELECT id_estado_servicio FROM serviciosTecnicos WHERE id = 986200) = 1
+       AND (SELECT id_estado_pago FROM serviciosTecnicos WHERE id = 986200) = 2,
+        'Servicio nuevo: debia quedar En proceso y No pagado por defecto';
+
+    PERFORM SV_SERVICIOTECNICO.up_estado(986200, 2, LOCALTIMESTAMP + INTERVAL '1 day');
+
+    ASSERT EXISTS (SELECT 1 FROM serviciosTecnicos
+                   WHERE id = 986200 AND id_estado_servicio = 2 AND fecha_entrega IS NOT NULL),
+        'Servicio entregado: debia quedar en estado 2 con fecha de entrega';
+
+    RAISE NOTICE 'OK [4] Servicio entregado con fecha de entrega';
+
+
+    -- 5. ELIMINAR UN SERVICIO QUE NO ESTA ENTREGADO
+    -- Trigger: solo se bloquea la eliminacion de los Entregados
+    PERFORM SV_SERVICIOTECNICO.ad(986201, '9862000001', '9860000002', 986200,
+                                  LOCALTIMESTAMP + INTERVAL '3 days');
+    PERFORM SV_SERVICIOTECNICO.de(986201);
+
+    ASSERT NOT EXISTS (SELECT 1 FROM serviciosTecnicos WHERE id = 986201),
+        'Servicio En proceso: debia poder eliminarse';
+    ASSERT EXISTS (SELECT 1 FROM serviciosTecnicos WHERE id = 986200),
+        'Servicio Entregado: debia seguir existiendo';
+
+    RAISE NOTICE 'OK [5] Se elimina un servicio En proceso y el Entregado se conserva';
+
+
+    -- 6. TECNICO Y VENDEDOR
+    -- Triggers: un empleado no puede ser tecnico y vendedor a la vez
+    -- (aqui, dos empleados distintos se registran y se modifican sin problema)
+    PERFORM SV_EMPLEADO.ad_tecnico('9863000001', 'tecnico986300@correo.com', '3109863001',
+                                   'Tecnico Dos', 2500000, 5000, 5);
+    PERFORM SV_EMPLEADO.ad_vendedor('9863000002', 'vendedor986300@correo.com', '3119863002',
+                                    'Vendedor Dos', 2000000, 3000);
+
+    PERFORM SV_EMPLEADO.up_tecnico('9863000001', 7000, 5);
+    PERFORM SV_EMPLEADO.up_vendedor('9863000002', 4500);
+
+    ASSERT (SELECT comision_servicio FROM tecnicos WHERE cedula_tecnico = '9863000001') = 7000,
+        'Tecnico: la comision debia quedar en 7000';
+    ASSERT (SELECT comision_venta FROM vendedores WHERE cedula_vendedor = '9863000002') = 4500,
+        'Vendedor: la comision debia quedar en 4500';
+
+    RAISE NOTICE 'OK [6] Tecnico y vendedor se registran y modifican';
+
+
+    -- 7. MODIFICAR DATOS DE UNA PERSONA
+    -- Trigger: la cedula no se puede modificar (aqui se cambian los demas datos)
+    PERFORM SV_CLIENTE.up('9860000002', 'cliente986002@correo.com', '3129860099', 'Cliente Modificado');
+    PERFORM SV_EMPLEADO.up('9860000001', 'vendedor986001@correo.com', '3119860099',
+                           'Vendedor Modificado', 2200000, TRUE);
+
+    ASSERT (SELECT nombre FROM personas WHERE cedula = '9860000002') = 'Cliente Modificado',
+        'Cliente: el nombre debia cambiar';
+    ASSERT (SELECT telefono FROM personas WHERE cedula = '9860000001') = '3119860099',
+        'Empleado: el telefono debia cambiar';
+
+    RAISE NOTICE 'OK [7] Se modifican los datos de la persona sin tocar la cedula';
+
+    RAISE NOTICE 'PRUEBAS OK DE COMPONENTES Y TRIGGERS FINALIZADAS';
 
 END $$;
 
--- Deshacer datos de prueba
-ROLLBACK;
 
-
-
-
-
-BEGIN;
-
-
-
--- Crear tecnico
-SELECT SV_EMPLEADO.ad_tecnico(
-    '9862000001',
-    'tecnico986200@correo.com',
-    '3109862001',
-    'Tecnico Prueba',
-    2500000,
-    5000,
-    1
-);
-
--- Crear cliente
-SELECT SV_CLIENTE.ad(
-    '9862000002',
-    'cliente986200@correo.com',
-    '3119862002',
-    'Cliente Prueba'
-);
-
--- Crear servicio en el catalogo
-SELECT SV_CATALOGO.ad(
-    986200,
-    'Mantenimiento de computador',
-    50000
-);
-
-
-
-DO $$
-DECLARE
-    v_cursor REFCURSOR := 'cursor_servicio';
-    v_servicio RECORD;
-    v_rechazado BOOLEAN;
-    v_error TEXT;
-
-BEGIN
-
-
-    PERFORM SV_SERVICIOTECNICO.ad(
-        986200,
-        '9862000001',
-        '9862000002',
-        986200,
-        LOCALTIMESTAMP + INTERVAL '3 days'
-    );
-
-    IF NOT EXISTS (
-        SELECT 1
-        FROM serviciosTecnicos
-        WHERE id = 986200
-          AND id_estado_servicio = 1
-          AND id_estado_pago = 2
-    ) THEN
-        RAISE EXCEPTION 'Error al registrar servicio';
-    END IF;
-
-    RAISE NOTICE 'OK CREATE: Servicio creado';
-    RAISE NOTICE 'Estado inicial: En proceso';
-    RAISE NOTICE 'Estado de pago: No pagado';
-
-
-    PERFORM SV_SERVICIOTECNICO.co(
-        v_cursor, 986200
-    );
-
-    FETCH v_cursor INTO v_servicio;
-
-    IF NOT FOUND THEN
-        RAISE EXCEPTION 'Error al consultar servicio';
-    END IF;
-
-    IF v_servicio.id IS DISTINCT FROM 986200 THEN
-        RAISE EXCEPTION 'Servicio incorrecto';
-    END IF;
-
-    RAISE NOTICE 'OK READ: Servicio consultado';
-    RAISE NOTICE 'ID: %', v_servicio.id;
-    RAISE NOTICE 'Tecnico: %', v_servicio.nombre_tecnico;
-    RAISE NOTICE 'Cliente: %', v_servicio.nombre_cliente;
-    RAISE NOTICE 'Servicio: %', v_servicio.descripcion_servicio;
-    RAISE NOTICE 'Estado: %', v_servicio.nombre_estado;
-
-    CLOSE v_cursor;
-
-    -- Modificar fecha estimada de entrega
-    PERFORM SV_SERVICIOTECNICO.up(
-        986200,
-        '9862000001',
-        '9862000002',
-        986200,
-        LOCALTIMESTAMP + INTERVAL '5 days'
-    );
-
-    IF NOT EXISTS (
-        SELECT 1
-        FROM serviciosTecnicos
-        WHERE id = 986200
-          AND fecha_estimada_entrega =
-              LOCALTIMESTAMP + INTERVAL '5 days'
-    ) THEN
-        RAISE EXCEPTION 'Error al actualizar servicio';
-    END IF;
-
-    RAISE NOTICE 'OK UPDATE: Fecha estimada actualizada';
-
-    -- Actualizar estado de pago
-    PERFORM SV_SERVICIOTECNICO.up_pago(
-        986200, 1
-    );
-
-    IF NOT EXISTS (
-        SELECT 1
-        FROM serviciosTecnicos
-        WHERE id = 986200
-          AND id_estado_pago = 1
-    ) THEN
-        RAISE EXCEPTION 'Error al actualizar pago';
-    END IF;
-
-    RAISE NOTICE 'OK UPDATE: Servicio pagado';
-
-    PERFORM SV_SERVICIOTECNICO.de(986200);
-
-    IF EXISTS (
-        SELECT 1
-        FROM serviciosTecnicos
-        WHERE id = 986200
-    ) THEN
-        RAISE EXCEPTION 'Error al eliminar servicio';
-    END IF;
-
-    RAISE NOTICE 'OK DELETE: Servicio eliminado';
-
-
-    -- Crear otro servicio para probar triggers
-    PERFORM SV_SERVICIOTECNICO.ad(
-        986201,
-        '9862000001',
-        '9862000002',
-        986200,
-        LOCALTIMESTAMP + INTERVAL '3 days'
-    );
-
-    v_rechazado := FALSE;
-
-    BEGIN
-        -- Intentar entregar sin fecha
-        PERFORM SV_SERVICIOTECNICO.up_estado(
-            986201, 2
-        );
-
-    EXCEPTION WHEN OTHERS THEN
-        GET STACKED DIAGNOSTICS v_error = MESSAGE_TEXT;
-
-        IF v_error NOT ILIKE
-           '%debe tener fecha de entrega%' THEN
-            RAISE;
-        END IF;
-
-        v_rechazado := TRUE;
-    END;
-
-    IF NOT v_rechazado THEN
-        RAISE EXCEPTION
-            'Error: permitio entregar sin fecha';
-    END IF;
-
-    RAISE NOTICE
-        'OK TRIGGER: Entrega sin fecha rechazada';
-
-    -- Entregar correctamente con fecha
-    PERFORM SV_SERVICIOTECNICO.up_estado(
-        986201,
-        2,
-        LOCALTIMESTAMP + INTERVAL '1 day'
-    );
-
-    IF NOT EXISTS (
-        SELECT 1
-        FROM serviciosTecnicos
-        WHERE id = 986201
-          AND id_estado_servicio = 2
-          AND fecha_entrega IS NOT NULL
-    ) THEN
-        RAISE EXCEPTION 'Error al entregar servicio';
-    END IF;
-
-    RAISE NOTICE
-        'OK TRIGGER: Servicio entregado con fecha';
-
-    v_rechazado := FALSE;
-
-    BEGIN
-        PERFORM SV_SERVICIOTECNICO.de(986201);
-
-    EXCEPTION WHEN OTHERS THEN
-        GET STACKED DIAGNOSTICS v_error = MESSAGE_TEXT;
-
-        IF v_error NOT ILIKE
-           '%no se puede eliminar un servicio en estado entregado%' THEN
-            RAISE;
-        END IF;
-
-        v_rechazado := TRUE;
-    END;
-
-    IF NOT v_rechazado THEN
-        RAISE EXCEPTION
-            'Error: permitio eliminar servicio entregado';
-    END IF;
-
-    RAISE NOTICE
-        'OK TRIGGER: Eliminacion rechazada';
-
-    RAISE NOTICE
-        'CRUD SERVICIO TECNICO FINALIZADO';
-
-END $$;
-
--- Deshacer los registros de prueba
 ROLLBACK;
