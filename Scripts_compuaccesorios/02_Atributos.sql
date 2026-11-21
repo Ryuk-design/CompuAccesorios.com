@@ -100,3 +100,27 @@ ALTER COLUMN id_estado_servicio
 ALTER TABLE serviciosTecnicos
 ALTER COLUMN id_estado_pago
     SET DEFAULT 2;
+
+
+-- Atributos JSON
+ALTER TABLE productos
+ADD CONSTRAINT chk_productos_especificaciones
+    CHECK (
+        CASE WHEN especificaciones ? 'marca'
+             THEN jsonb_typeof(especificaciones->'marca') = 'string'
+             ELSE TRUE END
+        AND
+        CASE WHEN especificaciones ? 'color'
+             THEN jsonb_typeof(especificaciones->'color') = 'string'
+             ELSE TRUE END
+        AND
+        CASE WHEN especificaciones ? 'peso_gramos'
+             THEN CASE WHEN jsonb_typeof(especificaciones->'peso_gramos') = 'number'
+                       THEN (especificaciones->>'peso_gramos')::numeric > 0
+                       ELSE FALSE END
+             ELSE TRUE END
+        AND
+        CASE WHEN especificaciones ? 'compatibilidad'
+             THEN jsonb_typeof(especificaciones->'compatibilidad') = 'array'
+             ELSE TRUE END
+    );

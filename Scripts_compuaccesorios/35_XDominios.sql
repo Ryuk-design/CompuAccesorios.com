@@ -16,3 +16,6 @@ DROP DOMAIN IF EXISTS TNombre;
 
 
 DROP DOMAIN IF EXISTS TTelefono;
+
+
+DROP DOMAIN IF EXISTS TEspecificaciones;

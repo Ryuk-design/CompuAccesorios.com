@@ -14,3 +14,9 @@ DROP INDEX IF EXISTS idx_detallesDeVenta_id_producto;
 
 
 DROP INDEX IF EXISTS idx_productos_id_categoria;
+
+
+DROP INDEX IF EXISTS idx_productos_especificaciones;
+
+
+DROP INDEX IF EXISTS idx_productos_marca;

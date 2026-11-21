@@ -42,4 +42,18 @@ SELECT * FROM productos
 WHERE id_categoria = 1;
 -- esperado: Bitmap Index Scan on idx_productos_id_categoria
 
+
+-- INDICE: idx_productos_especificaciones
+EXPLAIN
+SELECT id FROM productos
+WHERE especificaciones @> '{"marca": "HP", "color": "Negro"}';
+-- esperado: Bitmap Index Scan on idx_productos_especificaciones
+
+
+-- INDICE: idx_productos_marca
+EXPLAIN
+SELECT id FROM productos
+WHERE especificaciones->>'marca' = 'Sony';
+-- esperado: Bitmap Index Scan on idx_productos_ma
+
 RESET enable_seqscan;
