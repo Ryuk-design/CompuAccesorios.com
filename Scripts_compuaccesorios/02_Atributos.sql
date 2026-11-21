@@ -47,6 +47,12 @@ ADD CONSTRAINT chk_productos_cantidad_producto
     CHECK (cantidad_producto >= 0);
 
 
+-- Si no se indica, un producto nuevo queda con especificaciones vacias.
+ALTER TABLE productos
+ALTER COLUMN especificaciones
+    SET DEFAULT '{}';
+
+
 -- MANTENER PROVEEDOR
 -- Si no se indica, un proveedor nuevo queda como activo por defecto.
 ALTER TABLE proveedores

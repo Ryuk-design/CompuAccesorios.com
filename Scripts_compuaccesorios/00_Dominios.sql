@@ -33,3 +33,8 @@ CONSTRAINT chk_nombres
 CREATE DOMAIN TTelefono AS VARCHAR(10)
 CONSTRAINT chk_telefonos
     CHECK (VALUE ~ '^[0-9]{10}$');
+
+
+CREATE DOMAIN TEspecificaciones AS JSONB
+CONSTRAINT chk_especificaciones
+    CHECK (jsonb_typeof(VALUE) = 'object');

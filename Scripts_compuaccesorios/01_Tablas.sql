@@ -93,9 +93,9 @@ CREATE TABLE productos(
     cantidad_producto INT NOT NULL,
     id_categoria INT NOT NULL,
     id_proveedor INT NOT NULL,
-    id_inventario INT NOT NULL
+    id_inventario INT NOT NULL,
+    especificaciones TEspecificaciones NOT NULL
 );
-
 
 CREATE TABLE proveedores(
     id INT NOT NULL,
