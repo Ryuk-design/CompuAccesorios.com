@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Carga de productos de CompuAccesorios",
+  "description": "Documento JSON que se carga en la tabla productos (ver JSON_Datos.sql).",
+  "type": "object",
+  "required": ["productos"],
+  "properties": {
+    "productos": {
+      "description": "Lista de productos a insertar.",
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/producto" }
+    }
+  },
+  "$defs": {
+    "producto": {
+      "description": "Una fila de la tabla productos. 'especificaciones' es la columna JSONB.",
+      "type": "object",
+      "required": [
+        "id",
+        "nombre_producto",
+        "precio_unitario_producto",
+        "cantidad_producto",
+        "id_categoria",
+        "id_proveedor",
+        "id_inventario"
+      ],
+      "properties": {
+        "id":                       { "type": "integer", "minimum": 1 },
+        "nombre_producto":          { "type": "string", "minLength": 1, "maxLength": 100 },
+        "precio_unitario_producto": { "type": "integer", "exclusiveMinimum": 0 },
+        "cantidad_producto":        { "type": "integer", "minimum": 0 },
+        "id_categoria":             { "type": "integer", "minimum": 1 },
+        "id_proveedor":             { "type": "integer", "minimum": 1 },
+        "id_inventario":            { "type": "integer", "minimum": 1 },
+        "especificaciones":         { "$ref": "#/$defs/especificaciones" }
+      },
+      "additionalProperties": false
+    },
+    "especificaciones": {
+      "description": "Todas las llaves son opcionales. Se permiten llaves adicionales para poder extender el documento.",
+      "type": "object",
+      "properties": {
+        "marca":          { "type": "string" },
+        "color":          { "type": "string" },
+        "peso_gramos":    { "type": "number", "exclusiveMinimum": 0 },
+        "compatibilidad": { "type": "array", "items": { "type": "string" } }
+      },
+      "additionalProperties": true
+    }
+  }
+}
