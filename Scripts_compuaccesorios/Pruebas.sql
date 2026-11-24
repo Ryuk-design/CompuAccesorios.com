@@ -1,13 +1,11 @@
 -- HISTORIA 1: "EL PORTATIL QUE NO ENCENDIA"
 -- Servicios tecnicos. Personajes: Don Ricardo (administrador), Julian
 -- (tecnico) y Mariana (clienta).
--- LIMPIEZA PREVIA (deja la base lista para empezar la historia)
 
 
 -- CAPITULO 1: El nuevo tecnico
--- Don Ricardo, el administrador, crea el servicio "Diagnostico y
--- mantenimiento de portatil" en el catalogo y contrata a Julian,
--- especialista en hardware.
+-- Don Ricardo, el administrador, crea el servicio "Diagnostico y mantenimiento de portatil" en el catalogo
+-- y contrata a Julian, especialista en hardware.
 
 BEGIN;
 
@@ -41,26 +39,32 @@ COMMIT;
 -- Verificacion
 SELECT e.cedula_empleado, p.nombre, t.comision_servicio, es.especializacion
 FROM empleados e
-JOIN personas p ON p.cedula = e.cedula_empleado
-JOIN tecnicos t ON t.cedula_tecnico = e.cedula_empleado
-JOIN especializaciones es ON es.id = t.id_especializacion
+JOIN personas p
+    ON p.cedula = e.cedula_empleado
+JOIN tecnicos t
+    ON t.cedula_tecnico = e.cedula_empleado
+JOIN especializaciones es
+    ON es.id = t.id_especializacion
 WHERE e.cedula_empleado = '9720000001';
 
 DO $$
 BEGIN
     ASSERT EXISTS (SELECT 1 FROM tecnicos WHERE cedula_tecnico = '9720000001'),
         'Capitulo 1: Julian debia quedar registrado como tecnico';
+
     ASSERT EXISTS (SELECT 1 FROM catalogoDeServicios WHERE id = 972001),
         'Capitulo 1: el servicio debia quedar en el catalogo';
+
     RAISE NOTICE 'OK Capitulo 1: Julian entra al equipo como tecnico de hardware.';
 END $$;
 
 
 
 -- CAPITULO 2: Se fue la luz y un portatil apagado
--- Mariana llega con su portatil: se apago solo cuando se fue la luz y no
--- volvio a encender. Julian la registra como clienta y abre el servicio,
+-- Mariana llega con su portatil, se apago solo cuando se fue la luz y no volvio a encender
+-- Julian la registra como clienta y abre el servicio,
 -- prometiendo la entrega en tres dias.
+
 BEGIN;
 
 SET LOCAL ROLE rol_tecnico;
@@ -71,7 +75,10 @@ RESET ROLE;
 COMMIT;
 
 -- Verificacion
-SELECT s.id, es.nombre_estado AS estado, ep.nombre_estado_pago AS pago, s.fecha_estimada_entrega
+SELECT s.id,
+       es.nombre_estado AS estado,
+       ep.nombre_estado_pago AS pago,
+       s.fecha_estimada_entrega
 FROM serviciosTecnicos s
 JOIN estadosDeServicios es ON es.id = s.id_estado_servicio
 JOIN estadosDePago ep ON ep.id = s.id_estado_pago
@@ -89,9 +96,9 @@ END $$;
 
 
 -- CAPITULO 3: La llamada impaciente
--- Mariana llama dos veces. Julian, apurado por contestarle, marca el
--- servicio como Entregado sin escribir la fecha de entrega y el sistema
--- no se lo permite
+-- Mariana llama dos veces. Julian, apurado por contestarle, marca el servicio como Entregado sin escribir la fecha de entrega
+-- y el sistema no se lo permite
+
 DO $$
 DECLARE
     v_mensaje VARCHAR(300) := NULL;
@@ -114,9 +121,10 @@ END $$;
 
 
 -- CAPITULO 4: El diagnostico
--- Era el cargador y el polvo acumulado. Julian limpia el equipo, lo
--- prueba y esta vez si registra la entrega con su fecha. Mariana paga
--- en el mostrador.
+-- Era el cargador y el polvo acumulado.
+-- Julian limpia el equipo, lo prueba y esta vez si registra la entrega con su fecha.
+-- Mariana paga en el mostrador.
+
 BEGIN;
 
 SET LOCAL ROLE rol_tecnico;
@@ -145,8 +153,8 @@ END $$;
 
 
 -- CAPITULO 5: Un registro de mas
--- Esa tarde Julian descubre que, por error, abrio un segundo servicio
--- para Mariana. Como aun esta En proceso, puede borrarlo sin problema.
+-- Esa tarde Julian descubre que, por error, abrio un segundo servicio para Mariana.
+-- Como aun esta En proceso, puede borrarlo sin problema.
 
 BEGIN;
 SET LOCAL ROLE rol_tecnico;
@@ -154,7 +162,9 @@ SELECT SV_TECNICO.ad_servicio_tecnico(972002, '9720000001', '9720000002', 972001
 RESET ROLE;
 COMMIT;
 
-SELECT id, id_estado_servicio FROM serviciosTecnicos WHERE id IN (972001, 972002) ORDER BY id;   -- esperado: 2 filas
+SELECT id, id_estado_servicio
+FROM serviciosTecnicos
+WHERE id IN (972001, 972002) ORDER BY id;   -- esperado: 2 filas
 
 BEGIN;
 SET LOCAL ROLE rol_tecnico;
@@ -162,7 +172,10 @@ SELECT SV_TECNICO.de_servicio_tecnico(972002);
 RESET ROLE;
 COMMIT;
 
-SELECT id, id_estado_servicio FROM serviciosTecnicos WHERE id IN (972001, 972002) ORDER BY id;   -- esperado: solo 972001
+SELECT id,
+       id_estado_servicio
+FROM serviciosTecnicos
+WHERE id IN (972001, 972002) ORDER BY id;   -- esperado: solo 972001
 
 DO $$
 BEGIN
@@ -197,6 +210,7 @@ END $$;
 -- CAPITULO 6: Julian quiere turnos extra
 -- Julian le pide a Don Ricardo trabajar los sabados como vendedor. Pero
 -- en la tienda un empleado es tecnico o vendedor, nunca las dos cosas.
+
 DO $$
 DECLARE
     v_mensaje VARCHAR(300) := NULL;
@@ -218,7 +232,7 @@ END $$;
 
 
 -- Y si Julian, por su cuenta, intenta cobrar una venta en el mostrador,
--- su rol de tecnico no le abre esa puerta.
+-- su rol de tecnico no se lo permite.
 DO $$
 DECLARE
     v_denegado BOOLEAN := FALSE;
@@ -245,11 +259,14 @@ END $$;
 -- Al cerrar la semana, Julian revisa a quienes ha atendido. Mariana
 -- aparece con un unico servicio, el que quedo Entregado y Pagado.
 
-SELECT nombre_cliente, servicios_realizados
+SELECT nombre_cliente,
+       servicios_realizados
 FROM vw_clientes_atendidos_por_tecnico
 WHERE cedula_tecnico = '9720000001';
 
-SELECT id_servicio, nombre_cliente, nombre_estado
+SELECT id_servicio,
+       nombre_cliente,
+       nombre_estado
 FROM vw_servicios_por_tecnico
 WHERE cedula_tecnico = '9720000001';
 
