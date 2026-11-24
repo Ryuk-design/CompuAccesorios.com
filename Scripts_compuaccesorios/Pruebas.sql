@@ -1,4 +1,3 @@
-
 -- HISTORIA 1: "EL PORTATIL QUE NO ENCENDIA"
 -- Servicios tecnicos. Personajes: Don Ricardo (administrador), Julian
 -- (tecnico) y Mariana (clienta).
@@ -399,11 +398,11 @@ BEGIN
 END $$;
 
 
--- ---------------------------------------------------------------------
+
 -- CAPITULO 4: Disponibilidad en catalogo
 -- Con las diademas agotadas, el catalogo de productos disponibles que
 -- usa el equipo comercial no debe ofrecerlas.
--- ---------------------------------------------------------------------
+
 SELECT id_producto, nombre_producto, existencias
 FROM vw_catalogo_productos_disponibles
 WHERE id_producto IN (971001, 971002, 971003)
@@ -419,11 +418,11 @@ BEGIN
 END $$;
 
 
--- ---------------------------------------------------------------------
+
 -- CAPITULO 5: Recorte del presupuesto
 -- El area financiera pospone la compra del teclado. Camila retira ese
 -- producto de la venta.
--- ---------------------------------------------------------------------
+
 BEGIN;
 SET LOCAL ROLE rol_vendedor;
 SELECT SV_VENDEDOR.de_detalle_venta(971001, 971002);
@@ -445,12 +444,12 @@ BEGIN
 END $$;
 
 
--- ---------------------------------------------------------------------
+
 -- CAPITULO 6: Politica de precios
 -- Camila intenta aplicar un precio especial modificando el valor del
 -- mouse. La politica de precios es exclusiva del administrador: su rol
 -- no tiene acceso a esa operacion.
--- ---------------------------------------------------------------------
+
 DO $$
 DECLARE
     v_denegado BOOLEAN := FALSE;
@@ -472,11 +471,11 @@ BEGIN
 END $$;
 
 
--- ---------------------------------------------------------------------
+
 -- CAPITULO 7: Reposicion de inventario
 -- Laura Prieto, gerente, revisa el reporte de productos con bajo
 -- inventario. Las diademas, con stock en cero, deben figurar.
--- ---------------------------------------------------------------------
+
 SELECT id_producto, nombre_producto, stock
 FROM vw_productos_bajo_inventario
 WHERE id_producto = 971003;   -- esperado: diademas, stock 0
@@ -490,14 +489,14 @@ BEGIN
 END $$;
 
 
--- ---------------------------------------------------------------------
+
 -- CAPITULO 8: Anulacion de la orden
 -- El comite de compras no aprueba la orden. Camila anula la venta
 -- completa y el inventario regresa a su estado inicial.
 --
 -- Primero Camila la anula "a prueba": ve el resultado dentro de la
 -- transaccion y luego se arrepiente (ROLLBACK). Despues la anula de verdad.
--- ---------------------------------------------------------------------
+
 BEGIN;
 SET LOCAL ROLE rol_vendedor;
 SELECT SV_VENDEDOR.de_venta(971001);
